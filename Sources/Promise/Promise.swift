@@ -166,6 +166,10 @@ extension Promise {
     @inlinable public func sink(_ onFulfilled: @escaping (Output) -> ()) where Failure == Never {
         self.subscribe(onFulfilled, {_ in})
     }
+    
+    @inlinable public func finally(_ completion: @escaping () -> ()) {
+        self.subscribe({_ in completion() }, {_ in completion() })
+    }
 }
 
 extension Promise {
