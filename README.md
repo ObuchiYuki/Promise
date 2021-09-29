@@ -15,9 +15,10 @@ promise
     .map{ $0 * 10 } 
     .sink{ print($0) } // 100
     
-promise
-    .flatMap { Promise(output: $0 * 20) }
-    .sink{ print($0) } // 200
+let imageData = URLSession.shared.data(for: URL(string: "https://example.com/image.png))
+
+imageData
+    .sink{ print($0) } 
 ```
 
 

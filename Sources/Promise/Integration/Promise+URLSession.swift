@@ -8,11 +8,19 @@
 import Foundation
 
 extension URLSession {
-    @inlinable public func data(for url: URL) -> Promise<(URLResponse, Data), Error> {
-        data(for: URLRequest(url: url))
+    @inlinable public func data(for url: URL) -> Promise<Data, Error> {
+        fetch(for: url).map{ $0.1 }
     }
     
-    @inlinable public func data(for request: URLRequest) -> Promise<(URLResponse, Data), Error> {
+    @inlinable public func data(for request: URLRequest) -> Promise<Data, Error> {
+        fetch(for: request).map{ $0.1 }
+    }
+    
+    @inlinable public func fetch(for url: URL) -> Promise<(URLResponse, Data), Error> {
+        fetch(for: URLRequest(url: url))
+    }
+    
+    @inlinable public func fetch(for request: URLRequest) -> Promise<(URLResponse, Data), Error> {
         Promise{ resolve, reject in
             self.dataTask(with: request) { data, responce, error in
                 func buildErrorUserInfo() -> [String: Any] {
