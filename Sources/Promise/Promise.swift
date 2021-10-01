@@ -160,8 +160,10 @@ extension Promise {
     }
     
     @discardableResult
-    @inlinable public func finally(_ completion: @escaping () -> ()) -> Promise<Void, Never> {
-        self.subscribe({_ in completion() }, {_ in completion() })
+    @inlinable public func finally(_ onFinally: @escaping () -> ()) -> Promise<Output, Failure> {
+        Promise<Output, Failure> { resolve, reject in
+            self.subscribe({ onFinally(); resolve($0) }, { onFinally(); reject($0) })
+        }
     }
     
     @inlinable public func sink(_ onFulfilled: @escaping (Output) -> (), _ onRejected: @escaping (Failure) -> ()) {
