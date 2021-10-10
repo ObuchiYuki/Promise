@@ -140,7 +140,7 @@ extension Promise {
         }
     }
     
-    @inlinable public func receive(on callback: @escaping (() -> ()) -> ()) -> Promise<Output, Failure> {
+    @inlinable public func receive(on callback: @escaping (@escaping () -> ()) -> ()) -> Promise<Output, Failure> {
         Promise<Output, Failure> { resolve, reject in
             self.subscribe({ o in callback{ resolve(o) } }, { f in callback{ reject(f) } })
         }
