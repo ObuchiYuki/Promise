@@ -140,6 +140,12 @@ extension Promise {
         }
     }
     
+    @inlinable public func receive(on callback: @escaping (() -> ()) -> ()) -> Promise<Output, Failure> {
+        Promise<Output, Failure> { resolve, reject in
+            self.subscribe({ o in callback{ resolve(o) } }, { f in callback{ reject(f) } })
+        }
+    }
+    
     @inlinable public func peek(_ onFulfilled: @escaping (Output) -> ()) -> Promise<Output, Failure> {
         Promise<Output, Failure> { resolve, reject in
             self.subscribe({ onFulfilled($0); resolve($0) }, reject)
