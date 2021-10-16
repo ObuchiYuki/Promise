@@ -19,6 +19,10 @@ extension Promise {
         }
     }
     
+    public static func wait(on queue: DispatchQueue = .main, for interval: TimeInterval) -> Promise<Void, Never> {
+        Promise<Void, Never>(output: ()).wait(on: queue, for: interval)
+    }
+    
     public func wait<T, F>(for promise: Promise<T, F>) -> Promise<Output, Error> {
         Promise<Output, Error> { resolve, reject in
             self.sink({ output in promise.sink({_ in resolve(output) }, reject) }, reject)
