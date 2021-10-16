@@ -19,8 +19,8 @@ extension Promise {
         }
     }
     
-    public static func wait(on queue: DispatchQueue = .main, for interval: TimeInterval) -> Promise<Void, Never> {
-        Promise<Void, Never>(output: ()).wait(on: queue, for: interval)
+    public static func wait(on queue: DispatchQueue = .main, for interval: TimeInterval) -> Promise<Output, Failure> where Output == Void, Failure == Never {
+        Promise(output: ()).wait(on: queue, for: interval)
     }
     
     public func wait<T, F>(for promise: Promise<T, F>) -> Promise<Output, Error> {
