@@ -11,7 +11,7 @@ import Foundation
 extension Promise {
     public func breakpoint() -> Promise<Output, Failure> {
         self.catch{ error in
-            print(error)
+            Swift.print(error)
             raise(SIGTRAP)
         }
         return self
@@ -22,8 +22,20 @@ extension Promise {
         self.finally{
             let end = Date()
             let interval = end.timeIntervalSince(start)
-            print("[\(label)] \(interval) s")
+            Swift.print("[\(label)] \(interval) s")
         }
         return self
+    }
+    
+    public func print(_ prefix: String?) -> Promise<Output, Failure> {
+        return Promise{ resolve, reject in
+            self.sink({ output in
+                if let prefix = prefix { Swift.print("\(prefix): ", terminator: "") }
+                Swift.print("receive output:", "(\(output))")
+            }, { failure in
+                if let prefix = prefix { Swift.print("\(prefix): ", terminator: "") }
+                Swift.print("receive failure:", "(\(failure))")
+            })
+        }
     }
 }

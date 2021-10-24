@@ -66,7 +66,6 @@ final class PromiseTests: XCTestCase {
         wait(for: [exp], timeout: 1)
     }
 
-
     static var allTests = [
         ("testPromise_Chain", testPromise_Chain),
         ("testPromise_Reject", testPromise_Reject),

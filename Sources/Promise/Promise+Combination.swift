@@ -18,12 +18,6 @@ extension Promise {
     }
 }
 
-extension Array {
-    @inlinable public func combine<Output, Failure>() -> Promise<[Output], Failure> where Element == Promise<Output, Failure> {
-        Promise.combineCollection(self)
-    }
-}
-
 extension Promise {
     @inlinable public static func combine<A, B>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>) -> Promise<(A, B), Failure> {
         Promise<(A, B), Failure>{ resolve, reject in

@@ -5,7 +5,6 @@
 //  Created by yuki on 2021/10/24.
 //
 
-
 extension Promise {
     @inlinable public func map<T>(_ tranceform: @escaping (Output)->T) -> Promise<T, Failure> {
         Promise<T, Failure> { resolve, reject in
