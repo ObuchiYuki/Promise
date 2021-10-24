@@ -8,12 +8,12 @@
 import Foundation
 
 extension Promise {
-    @inlinable public static func async(on queue: DispatchQueue, _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) -> ()) -> Promise<Output, Failure> {
+    @inlinable public static func async(on queue: DispatchQueue = .global(), _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) -> ()) -> Promise<Output, Failure> {
         Promise<Output, Failure> { resolve, reject in
             queue.async { handler(resolve, reject) }
         }
     }
-    @inlinable public static func asyncError(on queue: DispatchQueue, _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) -> Promise<Output, Failure> where Failure == Error {
+    @inlinable public static func asyncError(on queue: DispatchQueue = .global(), _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) -> Promise<Output, Failure> where Failure == Error {
         Promise<Output, Failure> { resolve, reject in
             queue.async { do { try handler(resolve, reject) } catch { reject(error) } }
         }
@@ -26,19 +26,15 @@ extension Promise {
     }
 }
 
-extension DispatchQueue {
-    public static let promiseDefault = DispatchQueue(label: "async.queue")
-}
-
 @discardableResult
-@inlinable public func asyncHandler<Output>(on queue: DispatchQueue = .promiseDefault, _ block: @escaping (Await) -> Output) -> Promise<Output, Never> {
+@inlinable public func asyncHandler<Output>(on queue: DispatchQueue = .global(), _ block: @escaping (Await) -> Output) -> Promise<Output, Never> {
     Promise<Output, Never>{ resolve, _ in
         queue.async { resolve(block(Await())) }
     }
 }
 
 @discardableResult
-@inlinable public func asyncHandler<Output>(on queue: DispatchQueue = .promiseDefault, _ block: @escaping (Await) throws -> Output) -> Promise<Output, Error> {
+@inlinable public func asyncHandler<Output>(on queue: DispatchQueue = .global(), _ block: @escaping (Await) throws -> Output) -> Promise<Output, Error> {
     Promise<Output, Error>{ resolve, reject in
         queue.async { do { resolve(try block(Await())) } catch { reject(error) } }
     }
