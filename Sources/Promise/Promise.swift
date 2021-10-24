@@ -24,40 +24,34 @@ public final class Promise<Output, Failure> where Failure: Error {
         case rejected(Failure)
     }
     
-    @usableFromInline var state = State.pending
     @usableFromInline let stateQueue = DispatchQueue(label: "com.yuki.promise")
+    @usableFromInline var state = State.pending
     @usableFromInline var subscribers = [Subscriber]()
     
     @inlinable init() {}
 
     @inlinable func subscribe(_ resolve: @escaping (Output) -> (), _ reject: @escaping (Failure) -> ()) {
-        self.stateQueue.sync {
-            switch self.state {
-            case .pending: self.subscribers.append(Subscriber(resolve: resolve, reject: reject))
-            case .fulfilled(let output): resolve(output)
-            case .rejected(let error): reject(error)
-            }
+        switch self.stateQueue.sync(execute: { self.state }) {
+        case .pending: self.stateQueue.sync { self.subscribers.append(Subscriber(resolve: resolve, reject: reject)) }
+        case .fulfilled(let output): resolve(output)
+        case .rejected(let error): reject(error)
         }
     }
     
     @inlinable public func fullfill(_ output: Output) {
         assert(!self.isSettled, "Promsie already settled.")
         
-        self.stateQueue.sync {
-            self.state = .fulfilled(output)
-            for subscriber in self.subscribers { subscriber.resolve(output) }
-            self.subscribers = []
-        }
+        self.stateQueue.sync { self.state = .fulfilled(output) }
+        for subscriber in self.stateQueue.sync(execute: { self.subscribers }) { subscriber.resolve(output) }
+        self.stateQueue.sync { self.subscribers.removeAll() }
     }
     
     @inlinable public func reject(_ error: Failure) {
         assert(!self.isSettled, "Promsie already settled.")
         
-        self.stateQueue.sync {
-            self.state = .rejected(error)
-            for subscriber in self.subscribers { subscriber.reject(error) }
-            self.subscribers = []
-        }
+        self.stateQueue.sync { self.state = .rejected(error) }
+        for subscriber in self.stateQueue.sync(execute: { self.subscribers }) { subscriber.reject(error) }
+        self.stateQueue.sync { self.subscribers.removeAll() }
     }
 }
 
@@ -93,18 +87,14 @@ extension Promise {
 
 extension Promise {
     @inlinable public var isSettled: Bool {
-        self.stateQueue.sync {
-            if case .pending = self.state { return false }
-            return true
-        }
+        if case .pending = self.stateQueue.sync(execute: { self.state }) { return false }
+        return true
     }
     @inlinable public var result: Result<Output, Failure>? {
-        self.stateQueue.sync {
-            switch self.state {
-            case .pending: return nil
-            case .fulfilled(let output): return .success(output)
-            case .rejected(let failure): return .failure(failure)
-            }
+        switch self.stateQueue.sync(execute: { self.state }) {
+        case .pending: return nil
+        case .fulfilled(let output): return .success(output)
+        case .rejected(let failure): return .failure(failure)
         }
     }
 }
