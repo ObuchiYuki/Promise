@@ -9,7 +9,7 @@
 import Foundation
 
 extension Promise {
-    public func breakpoint() -> Promise<Output, Failure> {
+    @inlinable public func breakpoint() -> Promise<Output, Failure> {
         self.catch{ error in
             Swift.print(error)
             raise(SIGTRAP)
@@ -17,7 +17,7 @@ extension Promise {
         return self
     }
     
-    public func measure(label: String) -> Promise<Output, Failure> {
+    @inlinable public func measure(label: String) -> Promise<Output, Failure> {
         let start = Date()
         self.finally{
             let end = Date()
@@ -27,15 +27,14 @@ extension Promise {
         return self
     }
     
-    public func print(_ prefix: String?) -> Promise<Output, Failure> {
-        Promise{ resolve, reject in
-            self.sink({ output in
-                if let prefix = prefix { Swift.print("\(prefix): ", terminator: "") }
-                Swift.print("receive output:", "(\(output))")
-            }, { failure in
-                if let prefix = prefix { Swift.print("\(prefix): ", terminator: "") }
-                Swift.print("receive failure:", "(\(failure))")
-            })
-        }
+    @inlinable public func print(_ prefix: String?) -> Promise<Output, Failure> {
+        self.sink({ output in
+            if let prefix = prefix { Swift.print("\(prefix): ", terminator: "") }
+            Swift.print("receive output:", "(\(output))")
+        }, { failure in
+            if let prefix = prefix { Swift.print("\(prefix): ", terminator: "") }
+            Swift.print("receive failure:", "(\(failure))")
+        })
+        return self
     }
 }
