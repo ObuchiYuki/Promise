@@ -28,11 +28,14 @@ extension Promise {
     }
     
     @inlinable public func print(_ prefix: String?) -> Promise<Output, Failure> {
-        self.sink({ output in
+        func printPrefix() {
             if let prefix = prefix { Swift.print("\(prefix): ", terminator: "") }
+        }
+        self.sink({ output in
+            printPrefix()
             Swift.print("receive output:", "(\(output))")
         }, { failure in
-            if let prefix = prefix { Swift.print("\(prefix): ", terminator: "") }
+            printPrefix()
             Swift.print("receive failure:", "(\(failure))")
         })
         return self
