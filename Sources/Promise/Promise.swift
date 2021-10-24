@@ -39,7 +39,7 @@ public final class Promise<Output, Failure> where Failure: Error {
     }
     
     @inlinable public func fullfill(_ output: Output) {
-        if !self.isSettled { return }
+        if self.isSettled { return }
         
         self.stateQueue.sync { self.state = .fulfilled(output) }
         for subscriber in self.stateQueue.sync(execute: { self.subscribers }) { subscriber.resolve(output) }
@@ -47,7 +47,7 @@ public final class Promise<Output, Failure> where Failure: Error {
     }
     
     @inlinable public func reject(_ error: Failure) {
-        if !self.isSettled { return }
+        if self.isSettled { return }
         
         self.stateQueue.sync { self.state = .rejected(error) }
         for subscriber in self.stateQueue.sync(execute: { self.subscribers }) { subscriber.reject(error) }
