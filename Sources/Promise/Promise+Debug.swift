@@ -9,7 +9,7 @@
 import Foundation
 
 extension Promise {
-    @inlinable public func breakpoint() -> Promise<Output, Failure> {
+    @inlinable public func breakOnFailure() -> Promise<Output, Failure> {
         self.catch{ error in
             Swift.print(error)
             raise(SIGTRAP)
