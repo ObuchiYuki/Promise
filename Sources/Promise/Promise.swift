@@ -12,7 +12,7 @@ public final class Promise<Output, Failure> where Failure: Error {
         public let resolve: (Output) -> ()
         public let reject: (Failure) -> ()
         
-        @inlinable public init(resolve: @escaping (Output) -> (), reject: @escaping (Failure) -> ()) {
+        @inlinable init(resolve: @escaping (Output) -> (), reject: @escaping (Failure) -> ()) {
             self.resolve = resolve
             self.reject = reject
         }
