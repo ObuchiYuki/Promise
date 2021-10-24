@@ -9,15 +9,15 @@ import Foundation
 
 extension URLSession {
     @inlinable public func data(for url: URL) -> Promise<Data, Error> {
-        fetch(for: url).map{ $0.1 }
+        self.fetch(for: url).map{ $0.1 }
     }
     
     @inlinable public func data(for request: URLRequest) -> Promise<Data, Error> {
-        fetch(for: request).map{ $0.1 }
+        self.fetch(for: request).map{ $0.1 }
     }
     
     @inlinable public func fetch(for url: URL) -> Promise<(URLResponse, Data), Error> {
-        fetch(for: URLRequest(url: url))
+        self.fetch(for: URLRequest(url: url))
     }
     
     @inlinable public func fetch(for request: URLRequest) -> Promise<(URLResponse, Data), Error> {
@@ -39,7 +39,7 @@ extension URLSession {
                 } else if let data = data, let responce = responce {
                     resolve((responce, data))
                 } else {
-                    reject(NSError(domain: "No Date", code: 0, userInfo: buildErrorUserInfo()))
+                    reject(NSError(domain: "No Data", code: 0, userInfo: buildErrorUserInfo()))
                 }
             }
             .resume()
