@@ -41,11 +41,12 @@ extension Promise {
 }
 
 final public class Await {
+    
+    @usableFromInline init() {}
+    
     @inlinable static public func | <T, Failure>(await: Await, promise: Promise<T, Failure>) throws -> T {
         try await.execute(promise: promise)
     }
-    
-    @usableFromInline init() {}
 
     @inlinable static public func | <T>(await: Await, promise: Promise<T, Never>) -> T {
         await.execute(promise: promise)
