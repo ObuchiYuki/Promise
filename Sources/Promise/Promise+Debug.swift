@@ -28,7 +28,7 @@ extension Promise {
     }
     
     public func print(_ prefix: String?) -> Promise<Output, Failure> {
-        return Promise{ resolve, reject in
+        Promise{ resolve, reject in
             self.sink({ output in
                 if let prefix = prefix { Swift.print("\(prefix): ", terminator: "") }
                 Swift.print("receive output:", "(\(output))")
