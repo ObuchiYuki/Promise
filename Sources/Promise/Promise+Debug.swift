@@ -17,12 +17,15 @@ extension Promise {
         return self
     }
     
-    @inlinable public func measure(label: String) -> Promise<Output, Failure> {
+    @inlinable public func measure(_ prefix: String?) -> Promise<Output, Failure> {
+        func printPrefix() {
+            if let prefix = prefix { Swift.print("\(prefix): ", terminator: "") }
+        }
         let start = Date()
         self.finally{
-            let end = Date()
-            let interval = end.timeIntervalSince(start)
-            Swift.print("[\(label)] \(interval) s")
+            let interval = Date().timeIntervalSince(start)
+            printPrefix()
+            Swift.print("measure end:", "\(interval) s")
         }
         return self
     }
