@@ -24,9 +24,9 @@ public final class Promise<Output, Failure> where Failure: Error {
         case rejected(Failure)
     }
     
-    @usableFromInline let stateQueue = DispatchQueue(label: "com.yuki.promise")
     @usableFromInline var state = State.pending
     @usableFromInline var subscribers = [Subscriber]()
+    @usableFromInline let stateQueue = DispatchQueue(label: "com.yuki.promise")
     
     @inlinable init() {}
 
@@ -39,7 +39,7 @@ public final class Promise<Output, Failure> where Failure: Error {
     }
     
     @inlinable public func fullfill(_ output: Output) {
-        assert(!self.isSettled, "Promsie already settled.")
+        if !self.isSettled { return }
         
         self.stateQueue.sync { self.state = .fulfilled(output) }
         for subscriber in self.stateQueue.sync(execute: { self.subscribers }) { subscriber.resolve(output) }
@@ -47,7 +47,7 @@ public final class Promise<Output, Failure> where Failure: Error {
     }
     
     @inlinable public func reject(_ error: Failure) {
-        assert(!self.isSettled, "Promsie already settled.")
+        if !self.isSettled { return }
         
         self.stateQueue.sync { self.state = .rejected(error) }
         for subscriber in self.stateQueue.sync(execute: { self.subscribers }) { subscriber.reject(error) }
