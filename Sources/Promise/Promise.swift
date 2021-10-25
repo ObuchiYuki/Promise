@@ -7,7 +7,7 @@
 
 import Foundation
 
-public final class Promise<Output, Failure> where Failure: Error {
+public final class Promise<Output, Failure: Error> {
     public enum State {
         case pending
         case fulfilled(Output)
@@ -24,7 +24,7 @@ public final class Promise<Output, Failure> where Failure: Error {
         }
     }
 
-    public var state = State.pending
+    @usableFromInline var state = State.pending
     @usableFromInline var subscribers = [Subscriber]()
     
     @inlinable init() {}
@@ -33,7 +33,7 @@ public final class Promise<Output, Failure> where Failure: Error {
         switch self.state {
         case .pending: self.subscribers.append(Subscriber(resolve: resolve, reject: reject))
         case .fulfilled(let output): resolve(output)
-        case .rejected(let error): reject(error)
+        case .rejected(let failure): reject(failure)
         }
     }
     
@@ -45,11 +45,11 @@ public final class Promise<Output, Failure> where Failure: Error {
         self.subscribers.removeAll()
     }
     
-    @inlinable public func reject(_ error: Failure) {
+    @inlinable public func reject(_ failure: Failure) {
         if self.isSettled { return }
         
-        self.state = .rejected(error)
-        for subscriber in self.subscribers { subscriber.reject(error) }
+        self.state = .rejected(failure)
+        for subscriber in self.subscribers { subscriber.reject(failure) }
         self.subscribers.removeAll()
     }
 }
@@ -88,6 +88,10 @@ extension Promise {
     @inlinable public var isSettled: Bool {
         if case .pending = self.state { return false }
         return true
+    }
+    
+    @inlinable public func getState() -> State {
+        self.state
     }
 }
 
