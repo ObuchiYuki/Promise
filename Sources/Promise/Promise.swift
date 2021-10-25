@@ -8,7 +8,13 @@
 import Foundation
 
 public final class Promise<Output, Failure> where Failure: Error {
-    public struct Subscriber {
+    public enum State {
+        case pending
+        case fulfilled(Output)
+        case rejected(Failure)
+    }
+    
+    @usableFromInline struct Subscriber {
         public let resolve: (Output) -> ()
         public let reject: (Failure) -> ()
         
@@ -17,14 +23,8 @@ public final class Promise<Output, Failure> where Failure: Error {
             self.reject = reject
         }
     }
-    
-    @usableFromInline enum State {
-        case pending
-        case fulfilled(Output)
-        case rejected(Failure)
-    }
-    
-    @usableFromInline var state = State.pending
+
+    public var state = State.pending
     @usableFromInline var subscribers = [Subscriber]()
     
     @inlinable init() {}
