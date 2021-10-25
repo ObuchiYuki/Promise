@@ -89,13 +89,6 @@ extension Promise {
         if case .pending = self.state { return false }
         return true
     }
-    @inlinable public var result: Result<Output, Failure>? {
-        switch self.state {
-        case .pending: return nil
-        case .fulfilled(let output): return .success(output)
-        case .rejected(let failure): return .failure(failure)
-        }
-    }
 }
 
 extension Promise: CustomStringConvertible {
