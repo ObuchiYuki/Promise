@@ -85,11 +85,7 @@ extension Promise {
 }
 
 extension Promise {
-    @inlinable public var isSettled: Bool {
-        if case .pending = self.state { return false }
-        return true
-    }
-    
+    // swiftがinternal(set)を@usableFromInlineにできないため
     @inlinable public func getState() -> State {
         self.state
     }
