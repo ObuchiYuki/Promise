@@ -38,7 +38,7 @@ public final class Promise<Output, Failure: Error> {
     }
     
     @inlinable public func fullfill(_ output: Output) {
-        if self.isSettled { return }
+        guard case .pending = self.state else { return }
         
         self.state = .fulfilled(output)
         for subscriber in self.subscribers { subscriber.resolve(output) }
@@ -46,7 +46,7 @@ public final class Promise<Output, Failure: Error> {
     }
     
     @inlinable public func reject(_ failure: Failure) {
-        if self.isSettled { return }
+        guard case .pending = self.state else { return }
         
         self.state = .rejected(failure)
         for subscriber in self.subscribers { subscriber.reject(failure) }
