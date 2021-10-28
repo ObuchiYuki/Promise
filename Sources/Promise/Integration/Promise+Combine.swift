@@ -16,17 +16,13 @@ extension Promise {
     public final class Publisher: Combine.Publisher {
         init(_ promise: Promise<Output, Failure>) {
             self.future = Future{ handler in
-                promise.sink({ output in
-                    handler(.success(output))
-                }, { failure in
-                    handler(.failure(failure))
-                })
+                promise.subscribe({ handler(.success($0)) }, { handler(.failure($0)) })
             }
         }
         
         let future: Future<Output, Failure>
         
-        public func receive<Downstream: Combine.Subscriber>(subscriber: Downstream) where Downstream.Failure == Failure, Downstream.Input == Output {
+        public func receive<S: Combine.Subscriber>(subscriber: S) where S.Failure == Failure, S.Input == Output {
             future.receive(subscriber: subscriber)
         }
     }
