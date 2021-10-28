@@ -71,10 +71,6 @@ extension Promise {
         self.init()
         do { self.fullfill(try output()) } catch { self.reject(error) }
     }
-    
-    public static func pending() -> Promise<Output, Failure> {
-        Promise()
-    }
 }
 
 extension Promise: CustomStringConvertible {

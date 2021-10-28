@@ -15,18 +15,13 @@ extension Promise {
     
     public func breakpoint(_ receiveOutput: ((Output) -> Bool)? = nil, _ receiveFailure: ((Failure) -> Bool)? = nil) -> Promise<Output, Failure> {
         #if DEBUG
-        return Promise<Output, Failure>{ resolve, reject in
-            self.subscribe({ output in
-                if receiveOutput?(output) == true { raise(SIGTRAP) }
-                resolve(output)
-            }, { failure in
-                if receiveFailure?(failure) == true { raise(SIGTRAP) }
-                reject(failure)
-            })
-        }
-        #else
-        return self
+        self.subscribe({ output in
+            if receiveOutput?(output) == true { raise(SIGTRAP) }
+        }, { failure in
+            if receiveFailure?(failure) == true { raise(SIGTRAP) }
+        })
         #endif
+        return self
     }
     
     public func assertNoFailure(_ prefix: String = "", file: StaticString = #file, line: UInt = #line) -> Promise<Output, Never> {
@@ -52,25 +47,31 @@ extension Promise {
             if var stream = stream { Swift.print(text, to: &stream) } else { Swift.print(text) }
         }
         
-        return Promise<Output, Failure>{ resolve, reject in
-            self.subscribe({ output in
-                log("\(prefix)receive output: (\(output))"); resolve(output)
-            }, { failure in
-                log("\(prefix)receive failure: (\(failure))"); reject(failure)
-            })
-        }
+        self.subscribe({ output in
+            log("\(prefix)receive output: (\(output))")
+        }, { failure in
+            log("\(prefix)receive failure: (\(failure))")
+        })
+        
+        return self
     }
     
-    @inlinable public func measure(_ prefix: String?) -> Promise<Output, Failure> {
-        func printPrefix() {
-            if let prefix = prefix { Swift.print("\(prefix): ", terminator: "") }
+    public func measureTimeinterval(_ prefix: String = "", to stream: TextOutputStream? = nil) -> Promise<Output, Failure> {
+        let prefix = prefix.isEmpty ? "" : "\(prefix): "
+        let stream = stream.map(PrintTarget.init)
+        
+        func log(_ text: String) {
+            if var stream = stream { Swift.print(text, to: &stream) } else { Swift.print(text) }
         }
-        let start = Date()
-        self.finally{
-            let interval = Date().timeIntervalSince(start)
-            printPrefix()
-            Swift.print("measure end:", "\(interval) s")
+        
+        return Promise<Output, Failure>{ resolve, reject in
+            let startDate = Date()
+            
+            self.subscribe({ output in
+                
+            }, { failure in
+                
+            })
         }
-        return self
     }
 }
