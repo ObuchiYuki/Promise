@@ -1,6 +1,6 @@
 //
-//  Promise+Do.swift
-//  asycEmurate
+//  Promise+Async.swift
+//
 //
 //  Created by yuki on 2021/08/07.
 //

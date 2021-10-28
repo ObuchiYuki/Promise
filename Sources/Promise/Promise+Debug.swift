@@ -1,9 +1,8 @@
 //
 //  Promise+Debug.swift
-//  CoreUtil
+//
 //
 //  Created by yuki on 2021/08/23.
-//  Copyright © 2021 yuki. All rights reserved.
 //
 
 import Foundation

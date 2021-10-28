@@ -1,9 +1,8 @@
 //
-//  Promise+Operators.swift
-//  CoreUtil
+//  Promise+Combination.swift
+//
 //
 //  Created by yuki on 2021/08/12.
-//  Copyright © 2021 yuki. All rights reserved.
 //
 
 extension Promise {

@@ -1,8 +1,8 @@
 //
 //  Promise.swift
-//  asycEmurate
 //
-//  Created by yuki on 2021/08/07.
+//
+//  Created by yuki on 2020/10/11.
 //
 
 public final class Promise<Output, Failure: Error> {
