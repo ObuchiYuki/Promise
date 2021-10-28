@@ -8,18 +8,18 @@
 import Foundation
 
 extension Promise {
-    @inlinable public static func async(on queue: DispatchQueue = .global(), _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) -> ()) -> Promise<Output, Failure> {
+    public static func async(on queue: DispatchQueue = .global(), _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) -> ()) -> Promise<Output, Failure> {
         Promise<Output, Failure> { resolve, reject in
             queue.async { handler(resolve, reject) }
         }
     }
-    @inlinable public static func asyncError(on queue: DispatchQueue = .global(), _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) -> Promise<Output, Failure> where Failure == Error {
+    public static func asyncError(on queue: DispatchQueue = .global(), _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) -> Promise<Output, Failure> where Failure == Error {
         Promise<Output, Failure> { resolve, reject in
             queue.async { do { try handler(resolve, reject) } catch { reject(error) } }
         }
     }
     
-    @inlinable public func receive(on queue: DispatchQueue) -> Promise<Output, Failure> {
+    public func receive(on queue: DispatchQueue) -> Promise<Output, Failure> {
         Promise<Output, Failure>{ resolve, reject in
             self.sink({ o in queue.async { resolve(o) } }, { f in queue.async { reject(f) } })
         }
@@ -44,15 +44,15 @@ final public class Await {
     
     @usableFromInline init() {}
     
-    @inlinable static public func | <T, Failure>(await: Await, promise: Promise<T, Failure>) throws -> T {
+    static public func | <T, Failure>(await: Await, promise: Promise<T, Failure>) throws -> T {
         try await.execute(promise: promise)
     }
 
-    @inlinable static public func | <T>(await: Await, promise: Promise<T, Never>) -> T {
+    static public func | <T>(await: Await, promise: Promise<T, Never>) -> T {
         await.execute(promise: promise)
     }
         
-    @inlinable public func execute<Output>(promise: Promise<Output, Never>) -> Output {
+    public func execute<Output>(promise: Promise<Output, Never>) -> Output {
         let semaphore = DispatchSemaphore(value: 0)
         var output: Output?
         promise.sink{ output = $0; semaphore.signal() }
@@ -60,7 +60,7 @@ final public class Await {
         return output!
     }
     
-    @inlinable public func execute<Output, Failure>(promise: Promise<Output, Failure>) throws -> Output {
+    cpublic func execute<Output, Failure>(promise: Promise<Output, Failure>) throws -> Output {
         let semaphore = DispatchSemaphore(value: 0)
         var output: Output?
         var error: Error?

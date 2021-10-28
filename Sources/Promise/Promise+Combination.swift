@@ -7,19 +7,19 @@
 //
 
 extension Promise {
-    @inlinable public func combine<A>(_ a: Promise<A, Failure>) -> Promise<(Output, A), Failure> {
+    public func combine<A>(_ a: Promise<A, Failure>) -> Promise<(Output, A), Failure> {
         Promise.combine(self, a)
     }
-    @inlinable public func combine<A, B>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>) -> Promise<(Output, A, B), Failure> {
+    public func combine<A, B>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>) -> Promise<(Output, A, B), Failure> {
         Promise.combine(self, a, b)
     }
-    @inlinable public func combine<A, B, C>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>, _ c: Promise<C, Failure>) -> Promise<(Output, A, B, C), Failure> {
+    public func combine<A, B, C>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>, _ c: Promise<C, Failure>) -> Promise<(Output, A, B, C), Failure> {
         Promise.combine(self, a, b, c)
     }
 }
 
 extension Promise {
-    @inlinable public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
+    public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
         Promise<[Output], Failure> { resolve, reject in
             var outputs = [Output?](repeating: nil, count: promises.count)
             var hasRejected = false
@@ -38,7 +38,7 @@ extension Promise {
         }
     }
     
-    @inlinable public static func combine<A, B>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>) -> Promise<(A, B), Failure> {
+    public static func combine<A, B>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>) -> Promise<(A, B), Failure> {
         Promise<(A, B), Failure>{ resolve, reject in
             var outputA: A?
             var outputB: B?
@@ -59,7 +59,7 @@ extension Promise {
         }
     }
     
-    @inlinable public static func combine<A, B, C>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>, _ c: Promise<C, Failure>) -> Promise<(A, B, C), Failure> {
+    public static func combine<A, B, C>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>, _ c: Promise<C, Failure>) -> Promise<(A, B, C), Failure> {
         Promise<(A, B, C), Failure>{ resolve, reject in
             var outputA: A?
             var outputB: B?
@@ -82,7 +82,7 @@ extension Promise {
         }
     }
     
-    @inlinable public static func combine<A, B, C, D>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>, _ c: Promise<C, Failure>, _ d: Promise<D, Failure>) -> Promise<(A, B, C, D), Failure> {
+    public static func combine<A, B, C, D>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>, _ c: Promise<C, Failure>, _ d: Promise<D, Failure>) -> Promise<(A, B, C, D), Failure> {
         Promise<(A, B, C, D), Failure>{ resolve, reject in
             var outputA: A?
             var outputB: B?
