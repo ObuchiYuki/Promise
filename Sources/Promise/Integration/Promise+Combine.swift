@@ -5,6 +5,7 @@
 //  Created by yuki on 2021/10/24.
 //
 
+#if canImport(Combine)
 import Combine
 
 @available(OSX 10.15, *)
@@ -27,3 +28,4 @@ extension Promise {
         }
     }
 }
+#endif
