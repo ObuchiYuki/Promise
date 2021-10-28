@@ -48,7 +48,5 @@ public final class Promise<Output, Failure: Error> {
 }
 
 extension Promise: CustomStringConvertible {
-    public var description: String {
-        "Promise<\(Output.self), \(Failure.self)>(\(self.state))"
-    }
+    public var description: String { "Promise<\(Output.self), \(Failure.self)>(\(self.state))" }
 }
