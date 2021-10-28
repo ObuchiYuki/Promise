@@ -10,13 +10,11 @@ import Foundation
 
 extension Promise {
     public func breakpoint(_ receiveOutput: ((Output) -> Bool)? = nil, _ receiveFailure: ((Failure) -> Bool)? = nil) -> Promise<Output, Failure> {
-        #if DEBUG
         self.subscribe({ output in
             if receiveOutput?(output) == true { raise(SIGTRAP) }
         }, { failure in
             if receiveFailure?(failure) == true { raise(SIGTRAP) }
         })
-        #endif
         return self
     }
     
