@@ -13,8 +13,8 @@ public final class Promise<Output, Failure: Error> {
     }
     
     struct Subscriber {
-        public let resolve: (Output) -> ()
-        public let reject: (Failure) -> ()
+        let resolve: (Output) -> ()
+        let reject: (Failure) -> ()
     }
 
     public private(set) var state = State.pending
