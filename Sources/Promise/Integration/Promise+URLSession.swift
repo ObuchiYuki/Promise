@@ -1,6 +1,6 @@
 //
-//  Promise+URL.swift
-//  asycEmurate
+//  Promise+URLSession.swift
+//
 //
 //  Created by yuki on 2021/08/07.
 //
