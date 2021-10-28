@@ -5,8 +5,6 @@
 //  Created by yuki on 2021/08/07.
 //
 
-import Foundation
-
 public final class Promise<Output, Failure: Error> {
     public enum State {
         case pending
@@ -85,7 +83,6 @@ extension Promise {
 }
 
 extension Promise {
-    // swiftがinternal(set)を@usableFromInlineにできないため
     @inlinable public func getState() -> State {
         self.state
     }
