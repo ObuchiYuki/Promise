@@ -56,22 +56,23 @@ extension Promise {
         return self
     }
     
-    public func measureTimeinterval(_ prefix: String = "", to stream: TextOutputStream? = nil) -> Promise<Output, Failure> {
+    public func measureTimeInterval(_ prefix: String = "", to stream: TextOutputStream? = nil) -> Promise<Output, Failure> {
         let prefix = prefix.isEmpty ? "" : "\(prefix): "
         let stream = stream.map(PrintTarget.init)
+        let startDate = Date()
         
         func log(_ text: String) {
             if var stream = stream { Swift.print(text, to: &stream) } else { Swift.print(text) }
         }
         
-        return Promise<Output, Failure>{ resolve, reject in
-            let startDate = Date()
-            
-            self.subscribe({ output in
-                
-            }, { failure in
-                
-            })
-        }
+        self.subscribe({ output in
+            let timeInterval = Date().timeIntervalSince(startDate)
+            log("\(prefix)receive output: [\(timeInterval)s] (\(output))")
+        }, { failure in
+            let timeInterval = Date().timeIntervalSince(startDate)
+            log("\(prefix)receive failure: [\(timeInterval)s] (\(failure))")
+        })
+        
+        return self
     }
 }
