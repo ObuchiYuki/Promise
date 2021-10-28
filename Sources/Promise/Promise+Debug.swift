@@ -9,10 +9,6 @@
 import Foundation
 
 extension Promise {
-    public func breakpointOnError() -> Promise<Output, Failure> {
-        self.breakpoint(nil, {_ in true })
-    }
-    
     public func breakpoint(_ receiveOutput: ((Output) -> Bool)? = nil, _ receiveFailure: ((Failure) -> Bool)? = nil) -> Promise<Output, Failure> {
         #if DEBUG
         self.subscribe({ output in
@@ -22,6 +18,10 @@ extension Promise {
         })
         #endif
         return self
+    }
+    
+    public func breakpointOnError() -> Promise<Output, Failure> {
+        self.breakpoint(nil, {_ in true })
     }
     
     public func assertNoFailure(_ prefix: String = "", file: StaticString = #file, line: UInt = #line) -> Promise<Output, Never> {
