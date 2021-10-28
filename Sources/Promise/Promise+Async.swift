@@ -20,9 +20,7 @@ extension Promise {
     }
     
     public func receive(on queue: DispatchQueue) -> Promise<Output, Failure> {
-        Promise<Output, Failure>{ resolve, reject in
-            self.sink({ o in queue.async { resolve(o) } }, { f in queue.async { reject(f) } })
-        }
+        self.receive{ callback in queue.async { callback() } }
     }
 }
 
@@ -60,7 +58,7 @@ final public class Await {
         return output!
     }
     
-    cpublic func execute<Output, Failure>(promise: Promise<Output, Failure>) throws -> Output {
+    public func execute<Output, Failure>(promise: Promise<Output, Failure>) throws -> Output {
         let semaphore = DispatchSemaphore(value: 0)
         var output: Output?
         var error: Error?
