@@ -63,6 +63,8 @@ final class PromiseTests: XCTestCase {
             .peek{_ in XCTFail() }
             .catch{_ in exp.fulfill() }
         
+        
+        
         wait(for: [exp], timeout: 1)
     }
 

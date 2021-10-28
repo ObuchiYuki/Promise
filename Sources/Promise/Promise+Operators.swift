@@ -6,13 +6,13 @@
 //
 
 extension Promise {
-    @inlinable public func map<T>(_ tranceform: @escaping (Output)->T) -> Promise<T, Failure> {
+    @inlinable public func map<T>(_ tranceform: @escaping (Output) -> T) -> Promise<T, Failure> {
         Promise<T, Failure> { resolve, reject in
             self.subscribe({ resolve(tranceform($0)) }, reject)
         }
     }
     
-    @inlinable public func flatMap<T>(_ tranceform: @escaping (Output)->Promise<T, Failure>) -> Promise<T, Failure> {
+    @inlinable public func flatMap<T>(_ tranceform: @escaping (Output) -> Promise<T, Failure>) -> Promise<T, Failure> {
         Promise<T, Failure> { resolve, reject in
             self.subscribe({ tranceform($0).subscribe(resolve, reject) }, reject)
         }
@@ -30,15 +30,15 @@ extension Promise {
         }
     }
     
-    @inlinable public func mapError<T>(_ tranceform: @escaping (Failure)->T) -> Promise<Output, T> {
+    @inlinable public func mapError<T>(_ tranceform: @escaping (Failure) -> T) -> Promise<Output, T> {
         Promise<Output, T> { resolve, reject in
             self.subscribe(resolve, { reject(tranceform($0)) })
         }
     }
         
-    @inlinable public func replaceError(with value: Output) -> Promise<Output, Never> {
+    @inlinable public func replaceError(with value: @autoclosure @escaping () -> Output) -> Promise<Output, Never> {
         Promise<Output, Never> { resolve, _ in
-            self.subscribe(resolve, {_ in resolve(value) })
+            self.subscribe(resolve, {_ in resolve(value()) })
         }
     }
     
@@ -60,37 +60,37 @@ extension Promise {
         }
     }
     
-    @inlinable public func peek(_ onFulfilled: @escaping (Output) -> ()) -> Promise<Output, Failure> {
+    @inlinable public func peek(_ receiveOutput: @escaping (Output) -> ()) -> Promise<Output, Failure> {
         Promise<Output, Failure> { resolve, reject in
-            self.subscribe({ onFulfilled($0); resolve($0) }, reject)
+            self.subscribe({ receiveOutput($0); resolve($0) }, reject)
         }
     }
     
-    @inlinable public func peekError(_ onRejected: @escaping (Failure) -> ()) -> Promise<Output, Failure> {
+    @inlinable public func peekError(_ receiveFailure: @escaping (Failure) -> ()) -> Promise<Output, Failure> {
         Promise<Output, Failure> { resolve, reject in
-            self.subscribe(resolve, { onRejected($0); reject($0) })
+            self.subscribe(resolve, { receiveFailure($0); reject($0) })
         }
     }
     
     @discardableResult
-    @inlinable public func `catch`(_ onRejected: @escaping (Failure) -> ()) -> Promise<Void, Never> {
+    @inlinable public func `catch`(_ receiveFailure: @escaping (Failure) -> ()) -> Promise<Void, Never> {
         Promise<Void, Never> { resolve, _ in
-            self.subscribe({_ in resolve(()) }, { onRejected($0); resolve(()) })
+            self.subscribe({_ in resolve(()) }, { receiveFailure($0); resolve(()) })
         }
     }
     
     @discardableResult
-    @inlinable public func finally(_ onFinally: @escaping () -> ()) -> Promise<Output, Failure> {
+    @inlinable public func finally(_ receive: @escaping () -> ()) -> Promise<Output, Failure> {
         Promise<Output, Failure> { resolve, reject in
-            self.subscribe({ onFinally(); resolve($0) }, { onFinally(); reject($0) })
+            self.subscribe({ resolve($0); receive() }, { reject($0); receive() })
         }
     }
     
-    @inlinable public func sink(_ onFulfilled: @escaping (Output) -> (), _ onRejected: @escaping (Failure) -> ()) {
-        self.subscribe(onFulfilled, onRejected)
+    @inlinable public func sink(_ receiveOutput: @escaping (Output) -> (), _ receiveFailure: @escaping (Failure) -> ()) {
+        self.subscribe(receiveOutput, receiveFailure)
     }
     
-    @inlinable public func sink(_ onFulfilled: @escaping (Output) -> ()) where Failure == Never {
-        self.subscribe(onFulfilled, {_ in})
+    @inlinable public func sink(_ receiveOutput: @escaping (Output) -> ()) where Failure == Never {
+        self.subscribe(receiveOutput, {_ in})
     }
 }

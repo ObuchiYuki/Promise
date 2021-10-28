@@ -19,6 +19,25 @@ extension Promise {
 }
 
 extension Promise {
+    @inlinable public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
+        Promise<[Output], Failure> { resolve, reject in
+            var outputs = [Output?](repeating: nil, count: promises.count)
+            var hasRejected = false
+            
+            for (i, promise) in promises.enumerated() {
+                promise.sink({ output in
+                    if hasRejected { return }
+                    outputs[i] = output
+                    if let outputs = outputs as? [Output] { resolve(outputs) }
+                }, { failure in
+                    if hasRejected { return }
+                    hasRejected = true
+                    reject(failure)
+                })
+            }
+        }
+    }
+    
     @inlinable public static func combine<A, B>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>) -> Promise<(A, B), Failure> {
         Promise<(A, B), Failure>{ resolve, reject in
             var outputA: A?
@@ -85,30 +104,6 @@ extension Promise {
             b.sink({ outputB = $0; checkResolve() }, rejectIfNeeded)
             c.sink({ outputC = $0; checkResolve() }, rejectIfNeeded)
             d.sink({ outputD = $0; checkResolve() }, rejectIfNeeded)
-        }
-    }
-    
-    @inlinable public static func combineCollection(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
-        Promise<[Output], Failure> { resolve, reject in
-            var outputs = [Output?](repeating: nil, count: promises.count)
-            var settles = 0
-            var hasRejected = false
-            
-            for (i, promise) in promises.enumerated() {
-                promise.sink({ output in
-                    if hasRejected { return }
-                    outputs[i] = output
-                    settles += 1
-                    
-                    if settles == promises.count {
-                        resolve(outputs.compactMap{ $0 })
-                    }
-                }, { failure in
-                    if hasRejected { return }; hasRejected = true
-                    
-                    reject(failure)
-                })
-            }
         }
     }
 }
