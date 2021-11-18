@@ -20,7 +20,7 @@ extension Promise {
     }
     
     public func receive(on queue: DispatchQueue) -> Promise<Output, Failure> {
-        self.receive{ callback in queue.async { callback() } }
+        self.receive(on: { queue.async(execute: $0) })
     }
 }
 
