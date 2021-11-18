@@ -23,41 +23,15 @@ extension URLSession {
     public func fetch(for request: URLRequest) -> Promise<(URLResponse, Data), Error> {
         Promise{ resolve, reject in
             self.dataTask(with: request) { data, responce, error in
-                func buildErrorUserInfo() -> [String: Any] {
-                    var userInfo = ["request": request.descriptionObject, "responce": responce as Any]
-                    
-                    if let data = data, let string = String(data: data, encoding: .utf8) {
-                        userInfo["data"] = string
-                    }
-                    return userInfo
-                }
-                
-                if let httpResponce = responce as? HTTPURLResponse, httpResponce.hasError {
-                    reject(NSError(domain: "Error HTTP Responce", code: httpResponce.statusCode, userInfo: buildErrorUserInfo()))
-                } else if let error = error {
+                if let error = error {
                     reject(error)
                 } else if let data = data, let responce = responce {
                     resolve((responce, data))
                 } else {
-                    reject(NSError(domain: "No Data", code: 0, userInfo: buildErrorUserInfo()))
+                    reject(NSError(domain: "No data or responce", code: 0, userInfo: nil))
                 }
             }
             .resume()
         }
-    }
-}
-
-extension HTTPURLResponse {
-    var hasError: Bool { !(200..<400).contains(self.statusCode) }
-}
-
-extension URLRequest {
-    var descriptionObject: NSDictionary {
-        [
-            "URL": self.url as Any,
-            "Headers": allHTTPHeaderFields as Any,
-            "Body": httpBody as Any,
-            "Method": httpMethod ?? "GET"
-        ]
     }
 }

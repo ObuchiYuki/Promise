@@ -8,7 +8,6 @@
 #if canImport(Combine)
 import Combine
 
-@available(OSX 10.15, *)
 extension Promise {
     public func publisher() -> Publisher {
         Publisher(self)
