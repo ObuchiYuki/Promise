@@ -17,8 +17,18 @@ extension Promise {
         return self
     }
     
-    public func breakpointOnError() -> Promise<Output, Failure> {
-        self.breakpoint(nil, {_ in true })
+    public func breakpointOnError(_ prefix: String = "", to stream: TextOutputStream? = nil) -> Promise<Output, Failure> {
+        let prefix = prefix.isEmpty ? "" : "\(prefix): "
+        let stream = stream.map(PrintTarget.init)
+        
+        func log(_ text: String) {
+            if var stream = stream { Swift.print(text, to: &stream) } else { Swift.print(text) }
+        }
+        
+        return self.breakpoint(nil, { failure in
+            log("\(prefix)break failure: (\(failure))")
+            return true
+        })
     }
     
     public func assertNoFailure(_ prefix: String = "", file: StaticString = #file, line: UInt = #line) -> Promise<Output, Never> {
