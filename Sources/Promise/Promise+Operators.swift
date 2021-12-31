@@ -35,7 +35,13 @@ extension Promise {
             self.subscribe(resolve, { reject(tranceform($0)) })
         }
     }
-        
+    
+    public func replaceError(_ tranceform: @escaping (Failure) -> Output) -> Promise<Output, Never> {
+        Promise<Output, Never> { resolve, _ in
+            self.subscribe(resolve, { resolve(tranceform($0)) })
+        }
+    }
+    
     public func replaceError(with value: @autoclosure @escaping () -> Output) -> Promise<Output, Never> {
         Promise<Output, Never> { resolve, _ in
             self.subscribe(resolve, {_ in resolve(value()) })
