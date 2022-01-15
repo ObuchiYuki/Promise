@@ -19,7 +19,9 @@ extension Promise {
 
 extension Promise {
     public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
-        Promise<[Output], Failure> { resolve, reject in
+        if promises.isEmpty { return Promise<[Output], Failure>(output: []) }
+        
+        return Promise<[Output], Failure> { resolve, reject in
             var outputs = [Output?](repeating: nil, count: promises.count)
             var hasRejected = false
             
