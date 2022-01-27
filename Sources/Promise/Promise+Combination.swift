@@ -18,14 +18,6 @@ extension Promise {
 }
 
 extension Promise {
-//    public static func any(_ promises: [Promise<Output, Failure>]) -> Promise<Output?, Failure> {
-//        if promises.isEmpty { return Promise<Output?, Failure>(output: nil) }
-//
-//        return Promise<Output?, Failure> { resolve, reject in
-//
-//        }
-//    }
-    
     public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
         if promises.isEmpty { return Promise<[Output], Failure>(output: []) }
         
