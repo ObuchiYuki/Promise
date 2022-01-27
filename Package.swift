@@ -7,9 +7,9 @@ let package = Package(
     name: "Promise",
     platforms: [
         .iOS(.v10),
-        .macOS(.v10_10),
+        .macOS(.v10_12),
         .tvOS(.v9),
-        .watchOS(.v2)
+        .watchOS(.v3)
     ],
     products: [
         .library(name: "Promise", targets: ["Promise"]),
