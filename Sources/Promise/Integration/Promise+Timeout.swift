@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Promise+Timeout.swift
 //  
 //
 //  Created by yuki on 2022/01/27.
