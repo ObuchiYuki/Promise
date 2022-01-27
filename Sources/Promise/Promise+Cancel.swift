@@ -15,14 +15,14 @@ public struct PromiseCancelError: LocalizedError {
 
 extension Promise {
     public func cancelled<T>(by canceller: Promise<T, Never>) -> Promise<Output, Error> {
-        Promise<Output, Error>{ resolve, reject in
+        Promise<Output, Error> { resolve, reject in
             canceller.subscribe({ reject(PromiseCancelError(object: $0)) }, {_ in})
             self.subscribe(resolve, reject)
         }
     }
 
     public func cancelled<T>(by canceller: Promise<T, Never>) -> Promise<Output, PromiseCancelError> where Failure == Never {
-        Promise<Output, PromiseCancelError>{ resolve, reject in
+        Promise<Output, PromiseCancelError> { resolve, reject in
             canceller.subscribe({ reject(PromiseCancelError(object: $0))}, {_ in})
             self.subscribe(resolve, {_ in})
         }
