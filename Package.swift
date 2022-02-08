@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.5
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -12,10 +12,10 @@ let package = Package(
         .watchOS(.v3)
     ],
     products: [
-        .library(name: "Promise", targets: ["Promise"]),
+        .library(name: "Promise", type: .static, targets: ["Promise"])
     ],
     targets: [
-        .target(name: "Promise", dependencies: []),
-        .testTarget(name: "PromiseTests", dependencies: ["Promise"]),
+        .target(name: "Promise"),
+        .testTarget(name: "PromiseTests", dependencies: ["Promise"])
     ]
 )
