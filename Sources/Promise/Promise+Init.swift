@@ -25,7 +25,7 @@ extension Promise {
         self.reject(failure)
     }
     
-    public convenience init(output: @autoclosure () throws -> Output) where Failure == Error {
+    public convenience init(output: () throws -> Output) where Failure == Error {
         self.init()
         do { self.fullfill(try output()) } catch { self.reject(error) }
     }
