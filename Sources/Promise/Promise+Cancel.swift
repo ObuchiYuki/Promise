@@ -7,21 +7,31 @@
 
 import Foundation
 
-public struct PromiseCancelError: LocalizedError {
+final public class PromiseCancelError: LocalizedError {
+    static let shared = PromiseCancelError()
+    
     public var errorDescription: String? { "Promise has been cancelled." }
 }
 
 extension Promise {
-    public func cancelled<T>(by canceller: Promise<T, Never>) -> Promise<Output, Error> {
+    public func cancel() where Failure == Error {
+        self.reject(PromiseCancelError.shared)
+    }
+    
+    public func cancel() where Failure == PromiseCancelError {
+        self.reject(PromiseCancelError.shared)
+    }
+    
+    public func cancel(by canceller: Promise<Void, Never>) -> Promise<Output, Error> {
         Promise<Output, Error> { resolve, reject in
-            canceller.subscribe({_ in reject(PromiseCancelError()) }, {_ in})
+            canceller.subscribe({_ in reject(PromiseCancelError.shared) }, {_ in})
             self.subscribe(resolve, reject)
         }
     }
 
-    public func cancelled<T>(by canceller: Promise<T, Never>) -> Promise<Output, PromiseCancelError> where Failure == Never {
+    public func cancel(by canceller: Promise<Void, Never>) -> Promise<Output, PromiseCancelError> where Failure == Never {
         Promise<Output, PromiseCancelError> { resolve, reject in
-            canceller.subscribe({_ in reject(PromiseCancelError())}, {_ in})
+            canceller.subscribe({_ in reject(PromiseCancelError.shared)}, {_ in})
             self.subscribe(resolve, {_ in})
         }
     }
