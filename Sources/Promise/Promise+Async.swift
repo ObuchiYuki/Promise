@@ -42,12 +42,12 @@ final public class Await {
     
     @usableFromInline init() {}
     
-    static public func | <T, Failure>(await_: Await, promise: Promise<T, Failure>) throws -> T {
-        try await_.execute(promise: promise)
+    static public func | <T, Failure>(await: Await, promise: Promise<T, Failure>) throws -> T {
+        try `await`.execute(promise: promise)
     }
 
-    static public func | <T>(await_: Await, promise: Promise<T, Never>) -> T {
-        await_.execute(promise: promise)
+    static public func | <T>(await: Await, promise: Promise<T, Never>) -> T {
+        `await`.execute(promise: promise)
     }
         
     public func execute<Output>(promise: Promise<Output, Never>) -> Output {
