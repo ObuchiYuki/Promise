@@ -20,13 +20,13 @@ extension Promise {
         }
     }
     
-    public static func asyncError(on queue: DispatchQueue = .global(), _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) -> Promise<Output, Failure> where Failure == Error {
+    public static func tryAsync(on queue: DispatchQueue = .global(), _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) -> Promise<Output, Failure> where Failure == Error {
         Promise<Output, Failure> { resolve, reject in
             queue.async { do { try handler(resolve, reject) } catch { reject(error) } }
         }
     }
     
-    public static func asyncError(on queue: DispatchQueue = .global(), _ output: @escaping () throws -> (Output)) -> Promise<Output, Failure> where Failure == Error {
+    public static func tryAsync(on queue: DispatchQueue = .global(), _ output: @escaping () throws -> (Output)) -> Promise<Output, Failure> where Failure == Error {
         Promise<Output, Failure> { resolve, reject in
             queue.async { do { resolve(try output()) } catch { reject(error) } }
         }
