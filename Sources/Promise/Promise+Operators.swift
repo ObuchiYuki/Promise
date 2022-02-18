@@ -75,6 +75,18 @@ extension Promise {
         self.subscribe({_ in}, receiveFailure)
         return self
     }
+    public func tryPeek(_ receiveOutput: @escaping (Output) throws -> ()) -> Promise<Output, Error> {
+        Promise<Output, Error> { resolve, reject in
+            self.sink({ output in
+                do { try receiveOutput(output); resolve(output) } catch { reject(error) }
+            }, reject)
+        }
+    }
+    public func flatPeek<T>(_ tranceform: @escaping (Output) -> Promise<T, Failure>) -> Promise<Output, Failure> {
+        Promise{ resolve, reject in
+            self.sink({ output in tranceform(output).sink({_ in resolve(output) }, reject) }, reject)
+        }
+    }
     
     @discardableResult
     public func `catch`(_ receiveFailure: @escaping (Failure) -> ()) -> Promise<Void, Never> {
