@@ -8,7 +8,7 @@
 import Foundation
 
 final public class PromiseCancelError: LocalizedError {
-    static let shared = PromiseCancelError()
+    public static let shared = PromiseCancelError()
     
     public var errorDescription: String? { "Promise has been cancelled." }
 }
