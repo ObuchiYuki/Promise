@@ -96,6 +96,15 @@ extension Promise {
             self.subscribe({_ in resolve(()) }, { receiveFailure($0); resolve(()) })
         }
     }
+
+    public func `catch`<ErrorType: Error>(_ errorType: ErrorType.Type, _ receiveFailure: @escaping (ErrorType) -> ()) -> Promise<Output, Failure> {
+        Promise<Output, Failure> { resolve, reject in
+            self.subscribe(resolve, { failure in
+                if let error = failure as? ErrorType { receiveFailure(error) }
+                reject(failure)
+            })
+        }
+    }
     
     @discardableResult
     public func finally(_ receive: @escaping () -> ()) -> Promise<Output, Failure> {
