@@ -38,7 +38,7 @@ public final class Promise<Output, Failure: Error> {
         self.subscribers.removeAll()
     }
 
-    func subscribe(_ resolve: @escaping (Output) -> (), _ reject: @escaping (Failure) -> ()) {
+    public func subscribe(_ resolve: @escaping (Output) -> (), _ reject: @escaping (Failure) -> ()) {
         switch self.state {
         case .pending: self.subscribers.append(Subscriber(resolve: resolve, reject: reject))
         case .fulfilled(let output): resolve(output)
