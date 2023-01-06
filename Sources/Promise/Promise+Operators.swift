@@ -86,6 +86,12 @@ extension Promise {
         }
     }
     
+    public func packToResult() -> Promise<Result<Output, Failure>, Never> {
+        Promise<Result<Output, Failure>, Never>{ resolve, reject in
+            self.subscribe({ resolve(.success($0)) }, { resolve(.failure($0)) })
+        }
+    }
+    
     public func receive(on callback: @escaping (@escaping () -> ()) -> ()) -> Promise<Output, Failure> {
         Promise<Output, Failure> { resolve, reject in
             self.subscribe({ o in callback{ resolve(o) } }, { f in callback{ reject(f) } })
