@@ -48,6 +48,32 @@ extension Promise {
         }
     }
     
+    public func replaceError<ErrorType: Error>(_ errorType: ErrorType.Type, _ tranceform: @escaping (ErrorType) -> Output) -> Promise<Output, Failure> {
+        Promise<Output, Failure> { resolve, reject in
+            self.subscribe(resolve, {
+                if let e = $0 as? ErrorType { resolve(tranceform(e)) }
+                reject($0)
+            })
+        }
+    }
+    
+    public func tryReplaceError(_ tranceform: @escaping (Failure) throws -> Output) -> Promise<Output, Error> {
+        Promise<Output, Error> { resolve, reject in
+            self.subscribe(resolve, {
+                do { try resolve(tranceform($0)) } catch { reject(error) }
+            })
+        }
+    }
+    
+    public func tryReplaceError<ErrorType: Error>(_ errorType: ErrorType.Type, _ tranceform: @escaping (ErrorType) throws -> Output) -> Promise<Output, Error> {
+        Promise<Output, Error> { resolve, reject in
+            self.subscribe(resolve, {
+                if let e = $0 as? ErrorType { do { try resolve(tranceform(e)) } catch { reject(error) } }
+                reject($0)
+            })
+        }
+    }
+    
     public func eraseToError() -> Promise<Output, Error> {
         Promise<Output, Error> { resolve, reject in
             self.subscribe(resolve, reject)
