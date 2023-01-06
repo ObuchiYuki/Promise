@@ -18,27 +18,6 @@ extension Promise {
 }
 
 extension Promise {
-    public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
-        if promises.isEmpty { return Promise<[Output], Failure>(output: []) }
-        
-        return Promise<[Output], Failure> { resolve, reject in
-            var outputs = [Output?](repeating: nil, count: promises.count)
-            var hasRejected = false
-            
-            for (i, promise) in promises.enumerated() {
-                promise.sink({ output in
-                    if hasRejected { return }
-                    outputs[i] = output
-                    if let outputs = outputs as? [Output] { resolve(outputs) }
-                }, { failure in
-                    if hasRejected { return }
-                    hasRejected = true
-                    reject(failure)
-                })
-            }
-        }
-    }
-    
     public static func combine<A, B>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>) -> Promise<(A, B), Failure> {
         Promise<(A, B), Failure>{ resolve, reject in
             var outputA: A?
@@ -107,4 +86,42 @@ extension Promise {
             d.sink({ outputD = $0; checkResolve() }, rejectIfNeeded)
         }
     }
+}
+
+
+extension Array where Element: _PromiseCombineAllInterface {
+    public func combineAll() -> Promise<[Element.Output], Element.Failure> {
+        Element.combineAll(self)
+    }
+}
+
+public protocol _PromiseCombineAllInterface {
+    associatedtype Output
+    associatedtype Failure: Error
+    
+    static func combineAll(_ promises: [Self]) -> Promise<[Output], Failure>
+}
+
+extension Promise {
+    public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
+        if promises.isEmpty { return Promise<[Output], Failure>(output: []) }
+        
+        return Promise<[Output], Failure> { resolve, reject in
+            var outputs = [Output?](repeating: nil, count: promises.count)
+            var hasRejected = false
+            
+            for (i, promise) in promises.enumerated() {
+                promise.sink({ output in
+                    if hasRejected { return }
+                    outputs[i] = output
+                    if let outputs = outputs as? [Output] { resolve(outputs) }
+                }, { failure in
+                    if hasRejected { return }
+                    hasRejected = true
+                    reject(failure)
+                })
+            }
+        }
+    }
+    
 }
