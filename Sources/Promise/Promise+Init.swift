@@ -29,5 +29,17 @@ extension Promise {
         self.init()
         do { self.fullfill(try output()) } catch { self.reject(error) }
     }
+    
+    public static func fullfill(_ output: Output) -> Promise<Output, Failure> {
+        .init(output: output)
+    }
+    
+    public static func fullfill() -> Promise<Void, Failure> where Output == Void {
+        .init(output: ())
+    }
+    
+    public static func reject(_ failure: Failure) -> Promise<Void, Failure> where Output == Void {
+        .init(failure: failure)
+    }
 }
 
