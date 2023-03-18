@@ -5,6 +5,7 @@
 //  Created by yuki on 2022/01/27.
 //
 
+#if canImport(Foundation)
 import Foundation
 
 public struct PromiseTimeoutError: LocalizedError {
@@ -34,3 +35,4 @@ extension Promise {
         }
     }
 }
+#endif

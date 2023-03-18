@@ -5,32 +5,8 @@
 //  Created by yuki on 2021/08/23.
 //
 
-import Foundation
 
 extension Promise {
-    public func breakpoint(_ receiveOutput: ((Output) -> Bool)? = nil, _ receiveFailure: ((Failure) -> Bool)? = nil) -> Promise<Output, Failure> {
-        self.subscribe({ output in
-            if receiveOutput?(output) == true { raise(SIGTRAP) }
-        }, { failure in
-            if receiveFailure?(failure) == true { raise(SIGTRAP) }
-        })
-        return self
-    }
-    
-    public func breakpointOnError(_ prefix: String = "", to stream: TextOutputStream? = nil) -> Promise<Output, Failure> {
-        let prefix = prefix.isEmpty ? "" : "\(prefix): "
-        let stream = stream.map(PrintTarget.init)
-        
-        func log(_ text: String) {
-            if var stream = stream { Swift.print(text, to: &stream) } else { Swift.print(text) }
-        }
-        
-        return self.breakpoint(nil, { failure in
-            log("\(prefix)break failure: (\(failure))")
-            return true
-        })
-    }
-    
     public func assertNoFailure(_ prefix: String = "", file: StaticString = #file, line: UInt = #line) -> Promise<Output, Never> {
         Promise<Output, Never> { resolve, _ in
             self.subscribe(resolve, { error in
@@ -62,7 +38,42 @@ extension Promise {
         
         return self
     }
+}
+
+#if canImport(CoreFoundation)
+import CoreFoundation
+
+extension Promise {
+    public func breakpoint(_ receiveOutput: ((Output) -> Bool)? = nil, _ receiveFailure: ((Failure) -> Bool)? = nil) -> Promise<Output, Failure> {
+        self.subscribe({ output in
+            if receiveOutput?(output) == true { raise(SIGTRAP) }
+        }, { failure in
+            if receiveFailure?(failure) == true { raise(SIGTRAP) }
+        })
+        return self
+    }
     
+    public func breakpointOnError(_ prefix: String = "", to stream: TextOutputStream? = nil) -> Promise<Output, Failure> {
+        let prefix = prefix.isEmpty ? "" : "\(prefix): "
+        let stream = stream.map(PrintTarget.init)
+        
+        func log(_ text: String) {
+            if var stream = stream { Swift.print(text, to: &stream) } else { Swift.print(text) }
+        }
+        
+        return self.breakpoint(nil, { failure in
+            log("\(prefix)break failure: (\(failure))")
+            return true
+        })
+    }
+    
+}
+#endif
+
+#if canImport(Foundation)
+import Foundation
+
+extension Promise {
     public func measureTimeInterval(_ prefix: String = "", to stream: TextOutputStream? = nil) -> Promise<Output, Failure> {
         let prefix = prefix.isEmpty ? "" : "\(prefix): "
         let stream = stream.map(PrintTarget.init)
@@ -83,3 +94,4 @@ extension Promise {
         return self
     }
 }
+#endif

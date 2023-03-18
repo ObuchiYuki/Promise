@@ -5,6 +5,7 @@
 //  Created by yuki on 2021/08/23.
 //
 
+#if canImport(Foundation)
 import Foundation
 
 extension Promise {
@@ -16,3 +17,4 @@ extension Promise {
         Promise(output: ()).wait(on: queue, for: interval)
     }
 }
+#endif

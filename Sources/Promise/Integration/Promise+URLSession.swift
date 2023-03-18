@@ -5,6 +5,7 @@
 //  Created by yuki on 2021/08/07.
 //
 
+#if canImport(Foundation)
 import Foundation
 
 extension URLSession {
@@ -35,3 +36,4 @@ extension URLSession {
         }
     }
 }
+#endif

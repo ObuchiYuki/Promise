@@ -5,6 +5,7 @@
 //  Created by yuki on 2021/08/07.
 //
 
+#if canImport(Foundation)
 import Foundation
 
 extension Promise {
@@ -81,3 +82,4 @@ final public class Await {
         return output!
     }
 }
+#endif

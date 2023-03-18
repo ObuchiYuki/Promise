@@ -1,5 +1,4 @@
 import XCTest
-import DequeModule
 @testable import Promise
 
 struct PromiseTestError: Error {}
@@ -21,6 +20,7 @@ final class PromiseTests: XCTestCase {
     
     func testPromise_Map() throws {
         let exp = expectation(description: "Promise complete")
+        
         Promise(output: "Hello World")
             .map{ $0 + "!" }
             .sink{
@@ -63,8 +63,6 @@ final class PromiseTests: XCTestCase {
             .flatMap{_ in Promise<Int, PromiseTestError>(failure: PromiseTestError()) }
             .peek{_ in XCTFail() }
             .catch{_ in exp.fulfill() }
-        
-        
         
         wait(for: [exp], timeout: 1)
     }

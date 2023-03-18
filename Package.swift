@@ -14,14 +14,9 @@ let package = Package(
     products: [
         .library(name: "Promise", type: .static, targets: ["Promise"])
     ],
-    dependencies: [
-        .package(url: "https://github.com/apple/swift-collections.git", .upToNextMajor(from: "1.0.0"))
-    ],
+    dependencies: [],
     targets: [
         .target(name: "Promise"),
-        .testTarget(name: "PromiseTests", dependencies: [
-            "Promise",
-            .product(name: "Collections", package: "swift-collections")
-        ])
+        .testTarget(name: "PromiseTests", dependencies: [ "Promise" ])
     ]
 )
