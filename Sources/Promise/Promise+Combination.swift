@@ -110,24 +110,24 @@ extension Promise: _PromiseCombineAllInterface {
             let count = promises.count
             var outputs = [Output?](repeating: nil, count: count)
             var dp = [Bool](repeating: false, count: count)
-            var fullfilled = 0
+            var fulfilled = 0
             var hasRejected = false
-            var hasFullfilled = false
+            var hasFulfilled = false
             
             for (i, promise) in promises.enumerated() {
                 promise.sink({ output in
-                    if hasRejected || hasFullfilled { return }
+                    if hasRejected || hasFulfilled { return }
                     if dp[i] == false {
                         dp[i] = true
-                        fullfilled += 1
+                        fulfilled += 1
                     }
                     outputs[i] = output
-                    if fullfilled == count {
-                        hasFullfilled = true
+                    if fulfilled == count {
+                        hasFulfilled = true
                         resolve(outputs as! [Output])
                     }
                 }, { failure in
-                    if hasRejected || hasFullfilled { return }
+                    if hasRejected || hasFulfilled { return }
                     hasRejected = true
                     reject(failure)
                 })

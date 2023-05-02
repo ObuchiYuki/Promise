@@ -22,7 +22,7 @@ public final class Promise<Output, Failure: Error> {
     
     public init() {}
     
-    public func fullfill(_ output: Output) {
+    public func fulfill(_ output: Output) {
         guard case .pending = self.state else { return }
         
         self.state = .fulfilled(output)

@@ -8,16 +8,16 @@
 extension Promise {
     public convenience init(_ handler: (@escaping (Output) -> (), @escaping (Failure) -> ()) -> ()) {
         self.init()
-        handler(self.fullfill, self.reject)
+        handler(self.fulfill, self.reject)
     }
     public convenience init(_ handler: (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) where Failure == Error {
         self.init()
-        do { try handler(self.fullfill, self.reject) } catch { self.reject(error) }
+        do { try handler(self.fulfill, self.reject) } catch { self.reject(error) }
     }
     
     public convenience init(output: Output) {
         self.init()
-        self.fullfill(output)
+        self.fulfill(output)
     }
     
     public convenience init(failure: Failure) {
@@ -27,14 +27,14 @@ extension Promise {
     
     public convenience init(output: () throws -> Output) where Failure == Error {
         self.init()
-        do { self.fullfill(try output()) } catch { self.reject(error) }
+        do { self.fulfill(try output()) } catch { self.reject(error) }
     }
     
-    public static func fullfill(_ output: Output) -> Promise<Output, Failure> {
+    public static func fulfill(_ output: Output) -> Promise<Output, Failure> {
         .init(output: output)
     }
     
-    public static func fullfill() -> Promise<Void, Failure> where Output == Void {
+    public static func fulfill() -> Promise<Void, Failure> where Output == Void {
         .init(output: ())
     }
     
