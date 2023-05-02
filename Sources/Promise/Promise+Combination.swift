@@ -107,16 +107,27 @@ extension Promise: _PromiseCombineAllInterface {
         if promises.isEmpty { return Promise<[Output], Failure>(output: []) }
         
         return Promise<[Output], Failure> { resolve, reject in
-            var outputs = [Output?](repeating: nil, count: promises.count)
+            let count = promises.count
+            var outputs = [Output?](repeating: nil, count: count)
+            var dp = [Bool](repeating: false, count: count)
+            var fullfilled = 0
             var hasRejected = false
+            var hasFullfilled = false
             
             for (i, promise) in promises.enumerated() {
                 promise.sink({ output in
-                    if hasRejected { return }
+                    if hasRejected || hasFullfilled { return }
+                    if dp[i] == false {
+                        dp[i] = true
+                        fullfilled += 1
+                    }
                     outputs[i] = output
-                    if let outputs = outputs as? [Output] { resolve(outputs) }
+                    if fullfilled == count {
+                        hasFullfilled = true
+                        resolve(outputs as! [Output])
+                    }
                 }, { failure in
-                    if hasRejected { return }
+                    if hasRejected || hasFullfilled { return }
                     hasRejected = true
                     reject(failure)
                 })
