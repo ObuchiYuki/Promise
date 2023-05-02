@@ -67,6 +67,23 @@ final class PromiseTests: XCTestCase {
         wait(for: [exp], timeout: 1)
     }
     
+    func testCombineAll() throws {
+        let exp = expectation(description: "Promise complete")
+        
+        let promises = [
+            Promise<Int, Never>(output: 1),
+            Promise<Int, Never>(output: 2)
+        ]
+        
+        promises.combineAll()
+            .sink{
+                XCTAssertEqual($0, [1, 2])
+                exp.fulfill()
+            }
+        
+        wait(for: [exp], timeout: 1)
+    }
+    
     static var allTests = [
         ("testPromise_Chain", testPromise_Chain),
         ("testPromise_Reject", testPromise_Reject),

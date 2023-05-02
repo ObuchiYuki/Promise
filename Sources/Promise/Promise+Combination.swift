@@ -102,7 +102,7 @@ public protocol _PromiseCombineAllInterface {
     static func combineAll(_ promises: [Self]) -> Promise<[Output], Failure>
 }
 
-extension Promise {
+extension Promise: _PromiseCombineAllInterface {
     public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
         if promises.isEmpty { return Promise<[Output], Failure>(output: []) }
         
