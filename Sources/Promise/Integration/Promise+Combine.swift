@@ -28,4 +28,39 @@ extension Promise {
         }
     }
 }
+
+#if canImport(Foundation)
+import Foundation
+
+@available(OSX 10.15, iOS 13.0, *)
+extension Publisher {
+    public func firstOutput() -> Promise<Output?, Failure> {
+        let promise = Promise<Output?, Failure>()
+        var cancellable: AnyCancellable? = nil
+        var timer: Timer? = nil
+        
+        func clean() {
+            cancellable?.cancel(); cancellable = nil
+            timer?.invalidate(); timer = nil
+        }
+        
+        cancellable = self.sink(receiveCompletion: { completion in
+            guard case .pending = promise.state else { return }
+            
+            switch completion {
+            case .finished: promise.fulfill(nil)
+            case .failure(let error): promise.reject(error)
+            }
+            clean()
+        }, receiveValue: { value in
+            guard case .pending = promise.state else { return }
+            promise.fulfill(value)
+            clean()
+        })
+                
+        return promise
+    }
+}
+
+#endif
 #endif

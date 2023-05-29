@@ -44,7 +44,7 @@ public final class Promise<Output, Failure: Error> {
         case .fulfilled(let output): resolve(output)
         case .rejected(let failure): reject(failure)
         }
-    }
+    }    
 }
 
 extension Promise: CustomStringConvertible {

@@ -47,29 +47,11 @@ extension Promise {
             self.subscribe(resolve, {_ in resolve(value()) })
         }
     }
-    
-    public func replaceError<ErrorType: Error>(_ errorType: ErrorType.Type, _ tranceform: @escaping (ErrorType) -> Output) -> Promise<Output, Failure> {
-        Promise<Output, Failure> { resolve, reject in
-            self.subscribe(resolve, {
-                if let e = $0 as? ErrorType { resolve(tranceform(e)) }
-                reject($0)
-            })
-        }
-    }
-    
+        
     public func tryReplaceError(_ tranceform: @escaping (Failure) throws -> Output) -> Promise<Output, Error> {
         Promise<Output, Error> { resolve, reject in
             self.subscribe(resolve, {
                 do { try resolve(tranceform($0)) } catch { reject(error) }
-            })
-        }
-    }
-    
-    public func tryReplaceError<ErrorType: Error>(_ errorType: ErrorType.Type, _ tranceform: @escaping (ErrorType) throws -> Output) -> Promise<Output, Error> {
-        Promise<Output, Error> { resolve, reject in
-            self.subscribe(resolve, {
-                if let e = $0 as? ErrorType { do { try resolve(tranceform(e)) } catch { reject(error) } }
-                reject($0)
             })
         }
     }
@@ -91,7 +73,7 @@ extension Promise {
             self.subscribe({ resolve(.success($0)) }, { resolve(.failure($0)) })
         }
     }
-    
+
     public func receive(on callback: @escaping (@escaping () -> ()) -> ()) -> Promise<Output, Failure> {
         Promise<Output, Failure> { resolve, reject in
             self.subscribe({ o in callback{ resolve(o) } }, { f in callback{ reject(f) } })
@@ -110,7 +92,7 @@ extension Promise {
     
     public func tryPeek(_ receiveOutput: @escaping (Output) throws -> ()) -> Promise<Output, Error> {
         Promise<Output, Error> { resolve, reject in
-            self.sink({ output in
+            self.subscribe({ output in
                 do { try receiveOutput(output); resolve(output) } catch { reject(error) }
             }, reject)
         }
@@ -118,7 +100,19 @@ extension Promise {
     
     public func flatPeek<T>(_ tranceform: @escaping (Output) -> Promise<T, Failure>) -> Promise<Output, Failure> {
         Promise{ resolve, reject in
-            self.sink({ output in tranceform(output).sink({_ in resolve(output) }, reject) }, reject)
+            self.subscribe({ output in tranceform(output).sink({_ in resolve(output) }, reject) }, reject)
+        }
+    }
+
+    public func tryFlatPeek<T>(_ tranceform: @escaping (Output) throws -> Promise<T, Failure>) -> Promise<Output, Error> {
+        Promise<Output, Error>{ resolve, reject in
+            self.subscribe({ output in
+                do {
+                    try tranceform(output).subscribe({_ in resolve(output) }, reject)
+                } catch {
+                    reject(error)
+                }
+            }, reject)
         }
     }
     

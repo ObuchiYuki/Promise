@@ -14,7 +14,7 @@ extension Promise {
     }
     
     public static func wait(on queue: DispatchQueue = .main, for interval: TimeInterval) -> Promise<Output, Failure> where Output == Void, Failure == Never {
-        Promise(output: ()).wait(on: queue, for: interval)
+        Promise.resolve(()).wait(on: queue, for: interval)
     }
 }
 #endif

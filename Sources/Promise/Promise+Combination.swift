@@ -91,7 +91,7 @@ extension Promise {
 
 extension Array where Element: _PromiseCombineAllInterface {
     public func combineAll() -> Promise<[Element.Output], Element.Failure> {
-        Element.combineAll(self)
+        Element._combineAll(self)
     }
 }
 
@@ -99,12 +99,12 @@ public protocol _PromiseCombineAllInterface {
     associatedtype Output
     associatedtype Failure: Error
     
-    static func combineAll(_ promises: [Self]) -> Promise<[Output], Failure>
+    static func _combineAll(_ promises: [Self]) -> Promise<[Output], Failure>
 }
 
 extension Promise: _PromiseCombineAllInterface {
-    public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
-        if promises.isEmpty { return Promise<[Output], Failure>(output: []) }
+    public static func _combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
+        if promises.isEmpty { return Promise<[Output], Failure>.resolve([]) }
         
         return Promise<[Output], Failure> { resolve, reject in
             let count = promises.count

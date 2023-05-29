@@ -15,31 +15,32 @@ extension Promise {
         do { try handler(self.fulfill, self.reject) } catch { self.reject(error) }
     }
     
-    public convenience init(output: Output) {
-        self.init()
-        self.fulfill(output)
+    public static func resolve(_ output: Output) -> Promise<Output, Failure> {
+        let promise = Promise<Output, Failure>()
+        promise.fulfill(output)
+        return promise
+    }
+
+    public static func resolve() -> Promise<Void, Failure> where Output == Void {
+        let promise = Promise<Output, Failure>()
+        promise.fulfill(())
+        return promise
     }
     
-    public convenience init(failure: Failure) {
-        self.init()
-        self.reject(failure)
+    public static func reject(_ failure: Failure) -> Promise<Output, Failure> {
+        let promise = Promise<Output, Failure>()
+        promise.reject(failure)
+        return promise
     }
     
-    public convenience init(output: () throws -> Output) where Failure == Error {
-        self.init()
-        do { self.fulfill(try output()) } catch { self.reject(error) }
-    }
-    
-    public static func fulfill(_ output: Output) -> Promise<Output, Failure> {
-        .init(output: output)
-    }
-    
-    public static func fulfill() -> Promise<Void, Failure> where Output == Void {
-        .init(output: ())
-    }
-    
-    public static func reject(_ failure: Failure) -> Promise<Void, Failure> where Output == Void {
-        .init(failure: failure)
+    public static func resolve(_ output: () throws -> Output) -> Promise<Output, Error> where Failure == Error {
+        let promise = Promise<Output, Failure>()
+        do {
+            promise.fulfill(try output())
+        } catch {
+            promise.reject(error)
+        }
+        return promise
     }
 }
 

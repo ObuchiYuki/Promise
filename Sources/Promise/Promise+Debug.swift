@@ -5,7 +5,6 @@
 //  Created by yuki on 2021/08/23.
 //
 
-
 extension Promise {
     public func assertNoFailure(_ prefix: String = "", file: StaticString = #file, line: UInt = #line) -> Promise<Output, Never> {
         Promise<Output, Never> { resolve, _ in
@@ -16,24 +15,23 @@ extension Promise {
         }
     }
     
-    final private class PrintTarget: TextOutputStream {
-        var stream: TextOutputStream
-        func write(_ string: String) { stream.write(string) }
-        init(stream: TextOutputStream) { self.stream = stream }
+    private struct PrintTarget: TextOutputStream {
+        func write(_ string: String) { Swift.print(string) }
     }
     
-    public func print(_ prefix: String = "", to stream: TextOutputStream? = nil) -> Promise<Output, Failure> {
+    public func print(_ prefix: String = "") -> Promise<Output, Failure> {
+        var target = PrintTarget()
+        return self.print(prefix, to: &target)
+    }
+    
+    public func print<Target: TextOutputStream>(_ prefix: String = "", to target: inout Target) -> Promise<Output, Failure> {
+        var target = target
         let prefix = prefix.isEmpty ? "" : "\(prefix): "
-        let stream = stream.map(PrintTarget.init)
-        
-        func log(_ text: String) {
-            if var stream = stream { Swift.print(text, to: &stream) } else { Swift.print(text) }
-        }
         
         self.subscribe({ output in
-            log("\(prefix)receive output: (\(output))")
+            target.write("\(prefix)receive output: (\(output))")
         }, { failure in
-            log("\(prefix)receive failure: (\(failure))")
+            target.write("\(prefix)receive failure: (\(failure))")
         })
         
         return self
@@ -52,17 +50,18 @@ extension Promise {
         })
         return self
     }
+
+    public func breakpointOnError(_ prefix: String = "") -> Promise<Output, Failure> {
+        var target = PrintTarget()
+        return self.breakpointOnError(prefix, to: &target)
+    }
     
-    public func breakpointOnError(_ prefix: String = "", to stream: TextOutputStream? = nil) -> Promise<Output, Failure> {
+    public func breakpointOnError<Target: TextOutputStream>(_ prefix: String = "", to target: inout Target) -> Promise<Output, Failure> {
+        var target = target
         let prefix = prefix.isEmpty ? "" : "\(prefix): "
-        let stream = stream.map(PrintTarget.init)
-        
-        func log(_ text: String) {
-            if var stream = stream { Swift.print(text, to: &stream) } else { Swift.print(text) }
-        }
         
         return self.breakpoint(nil, { failure in
-            log("\(prefix)break failure: (\(failure))")
+            target.write("\(prefix)break failure: (\(failure))")
             return true
         })
     }
@@ -74,21 +73,22 @@ extension Promise {
 import Foundation
 
 extension Promise {
-    public func measureTimeInterval(_ prefix: String = "", to stream: TextOutputStream? = nil) -> Promise<Output, Failure> {
+    public func measureTimeInterval(_ prefix: String = "") -> Promise<Output, Failure> {
+        var target = PrintTarget()
+        return self.measureTimeInterval(prefix, to: &target)
+    }
+    
+    public func measureTimeInterval<Target: TextOutputStream>(_ prefix: String = "", to target: inout Target) -> Promise<Output, Failure> {
+        var target = target
         let prefix = prefix.isEmpty ? "" : "\(prefix): "
-        let stream = stream.map(PrintTarget.init)
         let startDate = Date()
-        
-        func log(_ text: String) {
-            if var stream = stream { Swift.print(text, to: &stream) } else { Swift.print(text) }
-        }
         
         self.subscribe({ output in
             let timeInterval = Date().timeIntervalSince(startDate)
-            log("\(prefix)receive output: [\(timeInterval)s] (\(output))")
+            target.write("\(prefix)receive output: [\(timeInterval)s] (\(output))")
         }, { failure in
             let timeInterval = Date().timeIntervalSince(startDate)
-            log("\(prefix)receive failure: [\(timeInterval)s] (\(failure))")
+            target.write("\(prefix)receive failure: [\(timeInterval)s] (\(failure))")
         })
         
         return self

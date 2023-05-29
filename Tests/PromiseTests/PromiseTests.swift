@@ -21,7 +21,7 @@ final class PromiseTests: XCTestCase {
     func testPromise_Map() throws {
         let exp = expectation(description: "Promise complete")
         
-        Promise(output: "Hello World")
+        Promise.resolve("Hello World")
             .map{ $0 + "!" }
             .sink{
                 XCTAssertEqual($0, "Hello World!")
@@ -33,8 +33,8 @@ final class PromiseTests: XCTestCase {
     func testPromise_FlatMap() throws {
         let exp = expectation(description: "Promise complete")
         
-        Promise(output: "Hello World")
-            .flatMap{ Promise(output: $0 + "!!!") }
+        Promise.resolve("Hello World")
+            .flatMap{ .resolve($0 + "!!!") }
             .sink{
                 XCTAssertEqual($0, "Hello World!!!")
                 exp.fulfill()
@@ -57,10 +57,10 @@ final class PromiseTests: XCTestCase {
     func testPromise_Chain() throws {
         let exp = expectation(description: "Promise complete")
         
-        Promise<Int, PromiseTestError>(output: 1)
-            .flatMap{ Promise(output: $0 + 1) }
+        Promise<Int, PromiseTestError>.resolve(1)
+            .flatMap{ .resolve($0 + 1) }
             .peek{ XCTAssertEqual($0, 2) }
-            .flatMap{_ in Promise<Int, PromiseTestError>(failure: PromiseTestError()) }
+            .flatMap{_ in Promise<Int, PromiseTestError>.reject(PromiseTestError()) }
             .peek{_ in XCTFail() }
             .catch{_ in exp.fulfill() }
         
@@ -71,8 +71,8 @@ final class PromiseTests: XCTestCase {
         let exp = expectation(description: "Promise complete")
         
         let promises = [
-            Promise<Int, Never>(output: 1),
-            Promise<Int, Never>(output: 2)
+            Promise<Int, Never>.resolve(1),
+            Promise<Int, Never>.resolve(2)
         ]
         
         promises.combineAll()
