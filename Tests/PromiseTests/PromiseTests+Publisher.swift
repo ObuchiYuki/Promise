@@ -11,15 +11,36 @@ import Combine
 @testable import Promise
 
 final class PromiseTestsPublisher: XCTestCase {
-    func testJustWithPromise() {
-        let pub = PassthroughSubject<Int, Never>()
-            
-        pub.last().firstValue().sink{ print($0) }
-        
-        pub.send(1)
-        pub.send(2)
-        pub.send(3)
-        pub.send(completion: .finished)
+    func testPublisherPromise_Just() {
+        var fulfilled = false
+        Just(123).firstValue()
+            .sink{
+                fulfilled = true
+                XCTAssertEqual($0, 123)
+            }
+        XCTAssert(fulfilled)
+    }
+    
+    func testPublisherPromise_Empty() {
+        var fulfilled = false
+        Empty<Int, Never>().firstValue()
+            .sink{
+                fulfilled = true
+                XCTAssertEqual($0, nil)
+            }
+        XCTAssert(fulfilled)
+    }
+    
+    func testPublisherPromise_Combined() {
+        var fulfilled = false
+        Just(1).combineLatest(Just(2), Just(3))
+            .firstValue()
+            .tryPeek{
+                fulfilled = true
+                XCTAssert(try XCTUnwrap($0) == (1, 2, 3))
+            }
+            .catch{_ in XCTFail() }
+        XCTAssert(fulfilled)
     }
 }
 
