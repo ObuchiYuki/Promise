@@ -29,19 +29,15 @@ extension Promise {
     }
 }
 
-#if canImport(Foundation)
-import Foundation
-
 @available(OSX 10.15, iOS 13.0, *)
 extension Publisher {
-    public func firstOutput() -> Promise<Output?, Failure> {
+    public func firstValue() -> Promise<Output?, Failure> {
         let promise = Promise<Output?, Failure>()
         var cancellable: AnyCancellable? = nil
-        var timer: Timer? = nil
         
         func clean() {
-            cancellable?.cancel(); cancellable = nil
-            timer?.invalidate(); timer = nil
+            cancellable?.cancel()
+            cancellable = nil
         }
         
         cancellable = self.sink(receiveCompletion: { completion in
@@ -61,6 +57,4 @@ extension Publisher {
         return promise
     }
 }
-
-#endif
 #endif
