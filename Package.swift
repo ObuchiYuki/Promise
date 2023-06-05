@@ -16,7 +16,8 @@ let package = Package(
     ],
     dependencies: [],
     targets: [
-        .target(name: "Promise"),
+        .target(name: "CPromiseHelper"),
+        .target(name: "Promise", dependencies: ["CPromiseHelper"]),
         .testTarget(name: "PromiseTests", dependencies: [ "Promise" ])
     ]
 )

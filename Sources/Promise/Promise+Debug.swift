@@ -5,6 +5,10 @@
 //  Created by yuki on 2021/08/23.
 //
 
+struct PrintTarget: TextOutputStream {
+    func write(_ string: String) { Swift.print(string) }
+}
+
 extension Promise {
     public func assertNoFailure(_ prefix: String = "", file: StaticString = #file, line: UInt = #line) -> Promise<Output, Never> {
         Promise<Output, Never> { resolve, _ in
@@ -13,10 +17,6 @@ extension Promise {
                 fatalError("\(prefix)\(error)", file: file, line: line)
             })
         }
-    }
-    
-    private struct PrintTarget: TextOutputStream {
-        func write(_ string: String) { Swift.print(string) }
     }
     
     public func print(_ prefix: String = "") -> Promise<Output, Failure> {
@@ -38,15 +38,14 @@ extension Promise {
     }
 }
 
-#if canImport(CoreFoundation)
-import CoreFoundation
+import CPromiseHelper
 
 extension Promise {
     public func breakpoint(_ receiveOutput: ((Output) -> Bool)? = nil, _ receiveFailure: ((Failure) -> Bool)? = nil) -> Promise<Output, Failure> {
         self.subscribe({ output in
-            if receiveOutput?(output) == true { raise(SIGTRAP) }
+            if receiveOutput?(output) == true { __stopInDebugger() }
         }, { failure in
-            if receiveFailure?(failure) == true { raise(SIGTRAP) }
+            if receiveFailure?(failure) == true { __stopInDebugger() }
         })
         return self
     }
@@ -67,31 +66,3 @@ extension Promise {
     }
     
 }
-#endif
-
-#if canImport(Foundation)
-import Foundation
-
-extension Promise {
-    public func measureTimeInterval(_ prefix: String = "") -> Promise<Output, Failure> {
-        var target = PrintTarget()
-        return self.measureTimeInterval(prefix, to: &target)
-    }
-    
-    public func measureTimeInterval<Target: TextOutputStream>(_ prefix: String = "", to target: inout Target) -> Promise<Output, Failure> {
-        var target = target
-        let prefix = prefix.isEmpty ? "" : "\(prefix): "
-        let startDate = Date()
-        
-        self.subscribe({ output in
-            let timeInterval = Date().timeIntervalSince(startDate)
-            target.write("\(prefix)receive output: [\(timeInterval)s] (\(output))")
-        }, { failure in
-            let timeInterval = Date().timeIntervalSince(startDate)
-            target.write("\(prefix)receive failure: [\(timeInterval)s] (\(failure))")
-        })
-        
-        return self
-    }
-}
-#endif

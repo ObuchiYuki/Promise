@@ -8,23 +8,11 @@
 #if canImport(Combine)
 import Combine
 
-@available(OSX 10.15, iOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension Promise {
-    public func publisher() -> Publisher {
-        Publisher(self)
-    }
-    
-    public final class Publisher: Combine.Publisher {
-        init(_ promise: Promise<Output, Failure>) {
-            self.future = Future{ handler in
-                promise.subscribe({ handler(.success($0)) }, { handler(.failure($0)) })
-            }
-        }
-        
-        let future: Future<Output, Failure>
-        
-        public func receive<S: Combine.Subscriber>(subscriber: S) where S.Failure == Failure, S.Input == Output {
-            future.receive(subscriber: subscriber)
+    public func publisher() -> some Publisher<Output, Failure> {
+        Future{ handler in
+            self.subscribe({ handler(.success($0)) }, { handler(.failure($0)) })
         }
     }
 }
@@ -33,27 +21,19 @@ extension Promise {
 extension Publisher {
     public func firstValue() -> Promise<Output?, Failure> {
         let promise = Promise<Output?, Failure>()
-        var cancellable: AnyCancellable? = nil
-        
-        func clean() {
-            cancellable?.cancel()
-            cancellable = nil
-        }
-        
-        cancellable = self.sink(receiveCompletion: { completion in
-            guard case .pending = promise.state else { return }
-            
+
+        var cancellable: AnyCancellable!
+        cancellable = self.sink{ completion in
             switch completion {
             case .finished: promise.fulfill(nil)
             case .failure(let error): promise.reject(error)
             }
-            clean()
-        }, receiveValue: { value in
-            guard case .pending = promise.state else { return }
+            cancellable.cancel()
+        } receiveValue: { value in
             promise.fulfill(value)
-            clean()
-        })
-                
+            cancellable.cancel()
+        }
+       
         return promise
     }
 }
