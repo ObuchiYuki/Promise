@@ -13,7 +13,7 @@ extension Promise {
         self.receive(on: { queue.asyncAfter(deadline: .now() + interval, execute: $0) })
     }
     
-    public static func wait(on queue: DispatchQueue = .main, for interval: TimeInterval) -> Promise<Output, Failure> where Output == Void, Failure == Never {
+    public static func wait(on queue: DispatchQueue = .main, for interval: TimeInterval) -> Promise<Output, Failure> where Output == Void {
         Promise.resolve(()).wait(on: queue, for: interval)
     }
 }

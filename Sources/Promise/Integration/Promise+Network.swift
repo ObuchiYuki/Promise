@@ -36,4 +36,10 @@ extension URLSession {
         }
     }
 }
+
+extension Data {
+    public static func async(contentsOf url: URL) -> Promise<Data, Error> {
+        URLSession.shared.data(for: url)
+    }
+}
 #endif

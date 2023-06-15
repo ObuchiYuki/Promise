@@ -64,5 +64,4 @@ extension Promise {
             return true
         })
     }
-    
 }

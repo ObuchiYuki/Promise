@@ -23,6 +23,7 @@ extension Promise {
         self.init()
         
         let task = Task{ self.fulfill(await task()) }
+        
         self.subscribe({_ in task.cancel() }, {_ in })
     }
     
