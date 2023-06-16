@@ -22,16 +22,16 @@ extension Publisher {
     public func firstValue() -> Promise<Output?, Failure> {
         let promise = Promise<Output?, Failure>()
 
-        var cancellable: AnyCancellable!
+        var cancellable: AnyCancellable?
         cancellable = self.sink{ completion in
             switch completion {
             case .finished: promise.fulfill(nil)
             case .failure(let error): promise.reject(error)
             }
-            cancellable.cancel()
+            cancellable?.cancel()
         } receiveValue: { value in
             promise.fulfill(value)
-            cancellable.cancel()
+            cancellable?.cancel()
         }
        
         return promise
