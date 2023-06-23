@@ -53,7 +53,6 @@ extension Promise {
 }
 
 final public class Await {
-    
     @usableFromInline init() {}
     
     static public func | <T, Failure>(await: Await, promise: Promise<T, Failure>) throws -> T {

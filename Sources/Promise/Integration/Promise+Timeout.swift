@@ -17,7 +17,7 @@ public struct PromiseTimeoutError: LocalizedError {
 extension Promise {
     public func timeout(with timeoutInterval: TimeInterval) -> Promise<Output, Error> {
         Promise<Output, Error>{ resolve, reject in
-            self.sink(resolve, reject)
+            self.subscribe(resolve, reject)
             
             Timer.scheduledTimer(withTimeInterval: timeoutInterval, repeats: false) { timer in
                 reject(PromiseTimeoutError(timeoutInterval: timeoutInterval))
@@ -25,9 +25,9 @@ extension Promise {
         }
     }
     
-    public func timeout(with timeoutInterval: TimeInterval) -> Promise<Output, PromiseTimeoutError> where Failure == Never{
+    public func timeout(with timeoutInterval: TimeInterval) -> Promise<Output, PromiseTimeoutError> where Failure == Never {
         Promise<Output, PromiseTimeoutError>{ resolve, reject in
-            self.sink(resolve)
+            self.subscribe(resolve, {_ in})
             
             Timer.scheduledTimer(withTimeInterval: timeoutInterval, repeats: false) { timer in
                 reject(PromiseTimeoutError(timeoutInterval: timeoutInterval))
