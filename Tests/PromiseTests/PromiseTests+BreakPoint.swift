@@ -1,11 +1,34 @@
 import XCTest
 @testable import Promise
 
-private let testBreakPoint = false
+protocol PromiseIterator<Element> {
+    associatedtype Element
+    
+    func next() -> Promise<Element?, Never>
+}
 
-final class PromiseTestsBreakPoint: XCTestCase {
-    func testPromise_BreakPoint() {
-  
+func for_promise<Iterator: PromiseIterator>(_ iterator: Iterator, _ block: @escaping (Iterator.Element, inout Bool) -> ()) {
+    var promise = iterator.next()
+    
+        
+}
+
+
+final class PromiseTestsLoop: XCTestCase {
+    func testPromise_loop() {
+        class IntIterator: PromiseIterator {
+            func next() -> Promise<Int?, Never> { .resolve(1) }
+        }
+        
+        let iterator = IntIterator()
+        var count = 0
+        for_promise(iterator) { value, stop in
+            print(count)
+            count += 1
+            if count > 10000 {
+                stop = true
+            }
+        }
     }
 }
 

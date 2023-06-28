@@ -3,6 +3,7 @@ import XCTest
 
 struct PromiseTestError: Error {}
 
+
 final class PromiseTests: XCTestCase {
     func testPromise_Callback2Promise() throws {
         let exp = expectation(description: "Promise complete")
