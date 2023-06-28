@@ -15,33 +15,6 @@ final public class PromiseCancel: LocalizedError {
 }
 
 extension Promise {
-    final public class OnCancel: Error {
-        var handlers = [(PromiseCancel) -> ()]()
-        
-        public func callAsFunction(_ handler: @escaping (PromiseCancel) -> ()) {
-            self.handlers.append{ handler($0) }
-        }
-        
-        public func callAsFunction(_ handler: @escaping () -> ()) {
-            self.handlers.append{_ in handler() }
-        }
-    }
-    
-    public static func cancelable(_ handler: (@escaping (Output) -> (), @escaping (Failure) -> (), OnCancel) -> ()) -> Promise<Output, Error> {
-        let promise = Promise<Output, Error>()
-        let onCancel = OnCancel()
-        
-        handler(promise.fulfill, promise.reject, onCancel)
-        
-        promise.catch{ error in
-            if let cancel = error as? PromiseCancel {
-                for handler in onCancel.handlers { handler(cancel) }
-            }
-        }
-        
-        return promise
-    }
-    
     public func cancel(_ cancel: PromiseCancel = PromiseCancel.shared) where Failure == Error {
         self.reject(cancel)
     }

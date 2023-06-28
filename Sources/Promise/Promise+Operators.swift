@@ -100,7 +100,7 @@ extension Promise {
     
     public func flatPeek<T>(_ tranceform: @escaping (Output) -> Promise<T, Failure>) -> Promise<Output, Failure> {
         Promise{ resolve, reject in
-            self.subscribe({ output in tranceform(output).sink({_ in resolve(output) }, reject) }, reject)
+            self.subscribe({ output in tranceform(output).subscribe({_ in resolve(output) }, reject) }, reject)
         }
     }
 

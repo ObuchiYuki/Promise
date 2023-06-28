@@ -11,7 +11,7 @@ struct PrintTarget: TextOutputStream {
 
 extension Promise {
     public func assertNoFailure(_ prefix: String = "", file: StaticString = #file, line: UInt = #line) -> Promise<Output, Never> {
-        Promise<Output, Never> { resolve, _ in
+        Promise<Output, Never>{ resolve, _ in
             self.subscribe(resolve, { error in
                 let prefix = prefix.isEmpty ? "" : prefix + ": "
                 fatalError("\(prefix)\(error)", file: file, line: line)

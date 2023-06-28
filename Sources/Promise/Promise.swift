@@ -5,6 +5,8 @@
 //  Created by yuki on 2020/10/11.
 //
 
+import CPromiseHelper
+
 public final class Promise<Output, Failure: Error> {
     public enum State {
         case pending
@@ -18,11 +20,16 @@ public final class Promise<Output, Failure: Error> {
     }
 
     public private(set) var state = State.pending
+    
     var subscribers = [Subscriber]()
+    let lock = UnfairLock()
     
     public init() {}
     
     public func fulfill(_ output: Output) {
+        lock.lock()
+        defer { lock.unlock() }
+        
         guard case .pending = self.state else { return }
         
         self.state = .fulfilled(output)
@@ -31,6 +38,9 @@ public final class Promise<Output, Failure: Error> {
     }
     
     public func reject(_ failure: Failure) {
+        lock.lock()
+        defer { lock.unlock() }
+        
         guard case .pending = self.state else { return }
         
         self.state = .rejected(failure)
@@ -39,12 +49,15 @@ public final class Promise<Output, Failure: Error> {
     }
 
     public func subscribe(_ resolve: @escaping (Output) -> (), _ reject: @escaping (Failure) -> ()) {
+        lock.lock()
+        defer { lock.unlock() }
+        
         switch self.state {
         case .pending: self.subscribers.append(Subscriber(resolve: resolve, reject: reject))
         case .fulfilled(let output): resolve(output)
         case .rejected(let failure): reject(failure)
         }
-    }    
+    }
 }
 
 extension Promise: CustomStringConvertible {
