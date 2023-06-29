@@ -1,41 +1,22 @@
 import XCTest
 @testable import Promise
 
-protocol PromiseIterator<Element> {
-    associatedtype Element
-    
-    func next() -> Promise<Element?, Never>
-}
-
-func for_promise<Iterator: PromiseIterator>(_ iterator: Iterator, _ block: @escaping (Iterator.Element, inout Bool) -> ()) {
-    var promise = iterator.next()
-    
-        
-}
-
-
-final class PromiseTestsLoop: XCTestCase {
-    func testPromise_loop() {
-        class IntIterator: PromiseIterator {
-            func next() -> Promise<Int?, Never> { .resolve(1) }
-        }
-        
-        let iterator = IntIterator()
-        var count = 0
-        for_promise(iterator) { value, stop in
-            print(count)
-            count += 1
-            if count > 10000 {
-                stop = true
-            }
-        }
-    }
-}
-
 final class PromiseTestsMultithread: XCTestCase {
-    func testMultithreadCombine() {
+    func testData() {
         let end = expectation(description: "")
         
+        let url = URL(fileURLWithPath: "/Users/yuki/Developer/Python/pdfmake/PDFUnpack.py")
+        Data.async(contentsOf: url)
+            .map{ String(data: $0, encoding: .utf8) }
+            .peek{_ in }
+            .catch{_ in XCTFail() }
+            .finally{ end.fulfill() }
+        
+        wait(for: [end])
+    }
+    
+    func testMultithreadCombine() {
+        let end = expectation(description: "")
         let promises = (0..<100).map{_ in Promise<Int, Never>() }
         
         for i in 0..<100 {

@@ -35,13 +35,12 @@ final class PromiseTestsConcurrency: XCTestCase {
         XCTAssert(throwed)
     }
 
-    
-    @available(macOS 13, *)
+    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
     func testMakePromiseFromAsyncContext() throws {
         let end = expectation(description: "end")
         
         let waitPromise = Promise{
-            try await Task.sleep(for: .milliseconds(10))
+            await Promise.wait(for: .milliseconds(1)).value()
         }
         
         waitPromise
