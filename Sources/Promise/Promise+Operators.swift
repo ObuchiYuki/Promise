@@ -18,6 +18,12 @@ extension Promise {
         }
     }
     
+    public func flatMap<T>(_ block: @escaping (Output, @escaping (T) -> (), @escaping (Failure)->()) -> ()) -> Promise<T, Failure> {
+        Promise<T, Failure>{ resolve, reject in
+            self.subscribe({ block($0, resolve, reject) }, reject)
+        }
+    }
+    
     public func tryMap<T>(_ tranceform: @escaping (Output) throws -> T) -> Promise<T, Error> {
         Promise<T, Error> { resolve, reject in
             self.subscribe({ do { try resolve(tranceform($0)) } catch { reject(error) } }, reject)
@@ -27,6 +33,12 @@ extension Promise {
     public func tryFlatMap<T>(_ tranceform: @escaping (Output) throws -> Promise<T, Error>) -> Promise<T, Error> {
         Promise<T, Error> { resolve, reject in
             self.subscribe({ do { try tranceform($0).subscribe(resolve, reject) } catch { reject(error) } }, reject)
+        }
+    }
+    
+    public func tryFlatMap<T>(_ block: @escaping (Output, @escaping (T) -> (), @escaping (Failure)->()) throws -> ()) -> Promise<T, Error> {
+        Promise<T, Error>{ resolve, reject in
+            self.subscribe({ do { try block($0, resolve, reject) } catch { reject(error) } }, reject)
         }
     }
     
@@ -129,6 +141,12 @@ extension Promise {
                 if let error = failure as? ErrorType { receiveFailure(error) }
                 reject(failure)
             })
+        }
+    }
+    
+    public func integrateError() -> Promise<Void, Error> where Output == Optional<Error> {
+        Promise<Void, Error>{ resolve, reject in
+            self.subscribe({ if let error = $0 { reject(error) } else { resolve(()) } }, reject)
         }
     }
     

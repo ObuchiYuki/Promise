@@ -10,13 +10,22 @@ import XCTest
 
 final class PromiseTestsConcurrency: XCTestCase {
     
+    func testAsyncPromise() async {
+        _ = await Promise.combineAll([
+            Promise.wait(for: 0.1),
+            Promise.wait(for: 0.1)
+        ])
+        .measureInterval{ XCTAssert($0 < 0.11) }
+        .value
+    }
+    
     func testNestedPromiseWithAsyncContext() async throws {
         
         let value = await Promise{
             await Promise{
-                return await Promise<Int, Never>.resolve(10).value()
-            }.value()
-        }.value()
+                return await Promise<Int, Never>.resolve(10).value
+            }.value
+        }.value
 
         XCTAssertEqual(value, 10)
     }
@@ -27,8 +36,8 @@ final class PromiseTestsConcurrency: XCTestCase {
             try await Promise{
                 try await Promise{
                     throw PromiseTestError()
-                }.value()
-            }.value()
+                }.value
+            }.value
         } catch {
             throwed = true
         }
@@ -40,7 +49,7 @@ final class PromiseTestsConcurrency: XCTestCase {
         let end = expectation(description: "end")
         
         let waitPromise = Promise{
-            await Promise.wait(for: .milliseconds(1)).value()
+            await Promise.wait(for: .milliseconds(1)).value
         }
         
         waitPromise
