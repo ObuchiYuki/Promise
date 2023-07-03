@@ -22,7 +22,7 @@ public final class Promise<Output, Failure: Error> {
     public private(set) var state = State.pending
     
     var subscribers = [Subscriber]()
-    let lock = UnfairLock()
+    let lock = RecursiveLock()
     
     public init() {}
     

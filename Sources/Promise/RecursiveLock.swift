@@ -7,7 +7,7 @@
 
 import CPromiseHelper
 
-final class UnfairLock {
+final class RecursiveLock {
     let opaque: UnsafeMutableRawPointer
     
     @inline(__always)

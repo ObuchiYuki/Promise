@@ -8,13 +8,11 @@
 #ifndef CPROMISEHELPER_HPP
 #define CPROMISEHELPER_HPP
 
-#include <stdint.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#pragma mark - PromiseUnfairLock
+#pragma mark - PromiseRecursiveLock
 
 void* _Nonnull promise_lock_alloc(void);
 

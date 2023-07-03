@@ -127,7 +127,7 @@ extension Promise: _PromiseCombineInterface {
     public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
         if promises.isEmpty { return Promise<[Output], Failure>.resolve([]) }
         
-        let lock = UnfairLock()
+        let lock = RecursiveLock()
         let promise = Promise<[Output], Failure>()
         
         let count = promises.count
