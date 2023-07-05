@@ -11,12 +11,12 @@ import XCTest
 final class PromiseTestsConcurrency: XCTestCase {
     
     func testAsyncPromise() async {
-//        _ = await Promise.combineAll([
-//            Promise.wait(for: 0.1),
-//            Promise.wait(for: 0.1)
-//        ])
-//        .measureInterval{ XCTAssert($0 < 0.11) }
-//        .value
+        _ = await Promise.combineAll([
+            Promise.wait(for: 0.1),
+            Promise.wait(for: 0.1)
+        ])
+        .measureInterval{ XCTAssert($0 < 0.11) }
+        .value
     }
     
     func testNestedPromiseWithAsyncContext() async throws {
