@@ -6,37 +6,37 @@
 //
 
 extension Promise {
-    public convenience init(_ handler: (@escaping (Output) -> (), @escaping (Failure) -> ()) -> ()) {
+    @inlinable public convenience init(_ handler: (@escaping (Output) -> (), @escaping (Failure) -> ()) -> ()) {
         self.init()
-        handler(self.fulfill, self.reject)
+        handler(self.resolve, self.reject)
     }
-    public convenience init(_ handler: (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) where Failure == Error {
+    @inlinable public convenience init(_ handler: (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) where Failure == Error {
         self.init()
-        do { try handler(self.fulfill, self.reject) } catch { self.reject(error) }
+        do { try handler(self.resolve, self.reject) } catch { self.reject(error) }
     }
     
-    public static func resolve(_ output: Output) -> Promise<Output, Failure> {
+    @inlinable public static func resolve(_ output: Output) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
-        promise.fulfill(output)
+        promise.resolve(output)
         return promise
     }
 
-    public static func resolve() -> Promise<Void, Failure> where Output == Void {
+    @inlinable public static func resolve() -> Promise<Void, Failure> where Output == Void {
         let promise = Promise<Output, Failure>()
-        promise.fulfill(())
+        promise.resolve(())
         return promise
     }
     
-    public static func reject(_ failure: Failure) -> Promise<Output, Failure> {
+    @inlinable public static func reject(_ failure: Failure) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
         promise.reject(failure)
         return promise
     }
     
-    public static func resolve(_ output: () throws -> Output) -> Promise<Output, Error> where Failure == Error {
+    @inlinable public static func resolve(_ output: () throws -> Output) -> Promise<Output, Error> where Failure == Error {
         let promise = Promise<Output, Failure>()
         do {
-            promise.fulfill(try output())
+            promise.resolve(try output())
         } catch {
             promise.reject(error)
         }

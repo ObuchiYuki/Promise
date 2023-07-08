@@ -21,7 +21,7 @@ final class PromiseTestsMultithread: XCTestCase {
         
         for i in 0..<100 {
             DispatchQueue.global().asyncAfter(deadline: .now() + 0.01) {
-                promises[i].fulfill(i)
+                promises[i].resolve(i)
             }
         }
         
@@ -41,7 +41,7 @@ final class PromiseTestsMultithread: XCTestCase {
         
         for i in 0..<4 {
             DispatchQueue.global().asyncAfter(deadline: .now() + 0.01) {
-                promises[i].fulfill(i)
+                promises[i].resolve(i)
             }
         }
         
@@ -64,7 +64,7 @@ final class PromiseTestsMultithread: XCTestCase {
         
         for i in 0..<100 {
             DispatchQueue.global().asyncAfter(deadline: .now() + 0.01) {
-                promises[i].fulfill(i)
+                promises[i].resolve(i)
             }
         }
         
@@ -85,9 +85,9 @@ final class PromiseTestsMultithread: XCTestCase {
         let promise = Promise<Int, Never>()
         
         promise
-            .sink{ promise.fulfill($0); end.fulfill() }
+            .sink{ promise.resolve($0); end.fulfill() }
         
-        promise.fulfill(1)
+        promise.resolve(1)
         
         wait(for: [end])
     }
@@ -101,7 +101,7 @@ final class PromiseTestsMultithread: XCTestCase {
         
         for i in 0..<100 {
             DispatchQueue.global().asyncAfter(deadline: .now()+0.01) {
-                promise.fulfill(i)
+                promise.resolve(i)
             }
         }
         

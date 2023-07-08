@@ -3,6 +3,11 @@ import XCTest
 
 struct PromiseTestError: Error {}
 
+final class PromiseIterationTest: XCTestCase {
+    func testPassPromiseToC() {
+        
+    }
+}
 
 final class PromiseTests: XCTestCase {
     func testPromise_Callback2Promise() throws {
@@ -16,6 +21,7 @@ final class PromiseTests: XCTestCase {
             XCTAssertEqual($0, "Hello World")
             exp.fulfill()
         }
+        
         wait(for: [exp], timeout: 1)
     }
     

@@ -6,101 +6,109 @@
 //
 
 extension Promise {
-    public func merge(_ a: Promise<Output, Failure>) -> Promise<Output, Failure> {
+    @inlinable public func merge(_ a: Promise<Output, Failure>) -> Promise<Output, Failure> {
         Promise.merge(self, a)
     }
     
-    public func merge(_ a: Promise<Output, Failure>, _ b: Promise<Output, Failure>) -> Promise<Output, Failure> {
+    @inlinable public func merge(_ a: Promise<Output, Failure>, _ b: Promise<Output, Failure>) -> Promise<Output, Failure> {
         Promise.merge(self, a, b)
     }
     
-    public func merge(_ a: Promise<Output, Failure>, _ b: Promise<Output, Failure>, _ c: Promise<Output, Failure>) -> Promise<Output, Failure> {
+    @inlinable public func merge(_ a: Promise<Output, Failure>, _ b: Promise<Output, Failure>, _ c: Promise<Output, Failure>) -> Promise<Output, Failure> {
         Promise.merge(self, a, b, c)
     }
     
-    public static func merge(_ a: Promise<Output, Failure>, _ b: Promise<Output, Failure>) -> Promise<Output, Failure> {
+    @inlinable public static func merge(_ a: Promise<Output, Failure>, _ b: Promise<Output, Failure>) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
-        a.subscribe(promise.fulfill, promise.reject)
-        b.subscribe(promise.fulfill, promise.reject)
+        a.subscribe(promise.resolve, promise.reject)
+        b.subscribe(promise.resolve, promise.reject)
         return promise
     }
     
-    public static func merge(_ a: Promise<Output, Failure>, _ b: Promise<Output, Failure>, _ c: Promise<Output, Failure>) -> Promise<Output, Failure> {
+    @inlinable public static func merge(_ a: Promise<Output, Failure>, _ b: Promise<Output, Failure>, _ c: Promise<Output, Failure>) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
-        a.subscribe(promise.fulfill, promise.reject)
-        b.subscribe(promise.fulfill, promise.reject)
-        c.subscribe(promise.fulfill, promise.reject)
+        a.subscribe(promise.resolve, promise.reject)
+        b.subscribe(promise.resolve, promise.reject)
+        c.subscribe(promise.resolve, promise.reject)
         return promise
     }
     
-    public static func merge(_ a: Promise<Output, Failure>, _ b: Promise<Output, Failure>, _ c: Promise<Output, Failure>, _ d: Promise<Output, Failure>) -> Promise<Output, Failure> {
+    @inlinable public static func merge(_ a: Promise<Output, Failure>, _ b: Promise<Output, Failure>, _ c: Promise<Output, Failure>, _ d: Promise<Output, Failure>) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
-        a.subscribe(promise.fulfill, promise.reject)
-        b.subscribe(promise.fulfill, promise.reject)
-        c.subscribe(promise.fulfill, promise.reject)
-        d.subscribe(promise.fulfill, promise.reject)
+        a.subscribe(promise.resolve, promise.reject)
+        b.subscribe(promise.resolve, promise.reject)
+        c.subscribe(promise.resolve, promise.reject)
+        d.subscribe(promise.resolve, promise.reject)
         return promise
     }
 }
 
 extension Promise {
-    public func combine<A>(_ a: Promise<A, Failure>) -> Promise<(Output, A), Failure> {
+    @inlinable public func combine<A>(_ a: Promise<A, Failure>) -> Promise<(Output, A), Failure> {
         Promise.combine(self, a)
     }
-    public func combine<A, B>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>) -> Promise<(Output, A, B), Failure> {
+    
+    @inlinable public func combine<A, B>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>) -> Promise<(Output, A, B), Failure> {
         Promise.combine(self, a, b)
     }
-    public func combine<A, B, C>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>, _ c: Promise<C, Failure>) -> Promise<(Output, A, B, C), Failure> {
+    
+    @inlinable public func combine<A, B, C>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>, _ c: Promise<C, Failure>) -> Promise<(Output, A, B, C), Failure> {
         Promise.combine(self, a, b, c)
     }
     
-    public static func combine<A, B>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>) -> Promise<(A, B), Failure> {
-        Promise<(A, B), Failure>{ resolve, reject in
-            var outputA: A?, outputB: B?
-            func check() {
-                guard let outputA = outputA, let outputB = outputB else { return }
-                resolve((outputA, outputB))
-            }
-            a.subscribe({ outputA = $0; check() }, reject)
-            b.subscribe({ outputB = $0; check() }, reject)
+    @inlinable public static func combine<A, B>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>) -> Promise<(A, B), Failure> {
+        let promise = Promise<(A, B), Failure>()
+        
+        var outputA: A?, outputB: B?
+        func check() {
+            guard let outputA = outputA, let outputB = outputB else { return }
+            promise.resolve((outputA, outputB))
         }
+        a.subscribe({ outputA = $0; check() }, promise.reject)
+        b.subscribe({ outputB = $0; check() }, promise.reject)
+        
+        return promise
     }
     
-    public static func combine<A, B, C>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>, _ c: Promise<C, Failure>) -> Promise<(A, B, C), Failure> {
-        Promise<(A, B, C), Failure>{ resolve, reject in
-            var outputA: A?, outputB: B?, outputC: C?
-            func check() {
-                guard let outputA = outputA, let outputB = outputB, let outputC = outputC else { return }
-                resolve((outputA, outputB, outputC))
-            }
-            a.subscribe({ outputA = $0; check() }, reject)
-            b.subscribe({ outputB = $0; check() }, reject)
-            c.subscribe({ outputC = $0; check() }, reject)
+    @inlinable public static func combine<A, B, C>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>, _ c: Promise<C, Failure>) -> Promise<(A, B, C), Failure> {
+        let promise = Promise<(A, B, C), Failure>()
+        
+        var outputA: A?, outputB: B?, outputC: C?
+        func check() {
+            guard let outputA = outputA, let outputB = outputB, let outputC = outputC else { return }
+            promise.resolve((outputA, outputB, outputC))
         }
+        a.subscribe({ outputA = $0; check() }, promise.reject)
+        b.subscribe({ outputB = $0; check() }, promise.reject)
+        c.subscribe({ outputC = $0; check() }, promise.reject)
+        
+        return promise
     }
     
-    public static func combine<A, B, C, D>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>, _ c: Promise<C, Failure>, _ d: Promise<D, Failure>) -> Promise<(A, B, C, D), Failure> {
-        Promise<(A, B, C, D), Failure>{ resolve, reject in
-            var outputA: A?, outputB: B?, outputC: C?, outputD: D?
-            func check() {
-                guard let outputA = outputA, let outputB = outputB, let outputC = outputC, let outputD = outputD else { return }
-                resolve((outputA, outputB, outputC, outputD))
-            }
-            a.subscribe({ outputA = $0; check() }, reject)
-            b.subscribe({ outputB = $0; check() }, reject)
-            c.subscribe({ outputC = $0; check() }, reject)
-            d.subscribe({ outputD = $0; check() }, reject)
+    @inlinable public static func combine<A, B, C, D>(_ a: Promise<A, Failure>, _ b: Promise<B, Failure>, _ c: Promise<C, Failure>, _ d: Promise<D, Failure>) -> Promise<(A, B, C, D), Failure> {
+        let promise = Promise<(A, B, C, D), Failure>()
+        
+        var outputA: A?, outputB: B?, outputC: C?, outputD: D?
+        func check() {
+            guard let outputA = outputA, let outputB = outputB, let outputC = outputC, let outputD = outputD else { return }
+            promise.resolve((outputA, outputB, outputC, outputD))
         }
+        a.subscribe({ outputA = $0; check() }, promise.reject)
+        b.subscribe({ outputB = $0; check() }, promise.reject)
+        c.subscribe({ outputC = $0; check() }, promise.reject)
+        d.subscribe({ outputD = $0; check() }, promise.reject)
+        
+        return promise
     }
 }
 
 
 extension Array where Element: _PromiseCombineInterface {
-    public func mergeAll() -> Promise<Element.Output, Element.Failure> {
+    @inlinable public func mergeAll() -> Promise<Element.Output, Element.Failure> {
         Element.mergeAll(self)
     }
     
-    public func combineAll() -> Promise<[Element.Output], Element.Failure> {
+    @inlinable public func combineAll() -> Promise<[Element.Output], Element.Failure> {
         Element.combineAll(self)
     }
 }
@@ -114,17 +122,17 @@ public protocol _PromiseCombineInterface {
 }
 
 extension Promise: _PromiseCombineInterface {
-    public static func mergeAll(_ promises: [Promise<Output, Failure>]) -> Promise<Output, Failure> {
+    @inlinable public static func mergeAll(_ promises: [Promise<Output, Failure>]) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
         
         for sub in promises {
-            sub.subscribe(promise.fulfill, promise.reject)
+            sub.subscribe(promise.resolve, promise.reject)
         }
         
         return promise
     }
     
-    public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
+    @inlinable public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
         if promises.isEmpty { return Promise<[Output], Failure>.resolve([]) }
         
         let lock = RecursiveLock()
@@ -149,7 +157,7 @@ extension Promise: _PromiseCombineInterface {
                 outputs[i] = output
                 if fulfilled == count {
                     hasFulfilled = true
-                    promise.fulfill(outputs as! [Output])
+                    promise.resolve(outputs as! [Output])
                 }
             }, { failure in
                 lock.lock(); defer { lock.unlock() }

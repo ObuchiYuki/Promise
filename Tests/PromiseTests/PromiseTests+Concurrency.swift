@@ -19,11 +19,10 @@ final class PromiseTestsConcurrency: XCTestCase {
         .value
     }
     
-    func testNestedPromiseWithAsyncContext() async throws {
-        
+    func testNestedPromiseWithAsyncContext() async throws {        
         let value = await Promise{
             await Promise{
-                return await Promise<Int, Never>.resolve(10).value
+                await Promise<Int, Never>.resolve(10).value
             }.value
         }.value
 

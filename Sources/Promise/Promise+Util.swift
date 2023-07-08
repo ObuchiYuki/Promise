@@ -6,18 +6,18 @@
 //
 
 extension Promise {
-    public var result: Result<Output, Failure>? {
-        if case .fulfilled(let output) = self.state {
+    @inlinable public var result: Result<Output, Failure>? {
+        if case .fulfilled(let output) = self._state {
             return .success(output)
         }
-        if case .rejected(let failure) = self.state {
+        if case .rejected(let failure) = self._state {
             return .failure(failure)
         }
         return nil
     }
     
-    public var isSettled: Bool {
-        if case .pending = self.state { return true }
+    @inlinable public var isSettled: Bool {
+        if case .pending = self._state { return true }
         return false
     }
 }

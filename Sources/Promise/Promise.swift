@@ -14,46 +14,52 @@ public final class Promise<Output, Failure: Error> {
         case rejected(Failure)
     }
     
-    struct Subscriber {
-        let resolve: (Output) -> ()
-        let reject: (Failure) -> ()
+    @usableFromInline struct Subscriber {
+        @usableFromInline let resolve: (Output) -> ()
+        @usableFromInline let reject: (Failure) -> ()
+        
+        @usableFromInline init(resolve: @escaping (Output) -> Void, reject: @escaping (Failure) -> Void) {
+            self.resolve = resolve
+            self.reject = reject
+        }
     }
-
-    public private(set) var state = State.pending
     
-    var subscribers = [Subscriber]()
-    let lock = RecursiveLock()
+    @inlinable public var state: State { _state }
+
+    @usableFromInline var _state = State.pending
+    @usableFromInline var _subscribers = [Subscriber]()
+    @usableFromInline let _lock = RecursiveLock()
     
     public init() {}
     
-    public func fulfill(_ output: Output) {
-        lock.lock()
-        defer { lock.unlock() }
+    @inlinable public func resolve(_ output: Output) {
+        self._lock.lock()
+        defer { self._lock.unlock() }
         
-        guard case .pending = self.state else { return }
+        guard case .pending = self._state else { return }
         
-        self.state = .fulfilled(output)
-        for subscriber in self.subscribers { subscriber.resolve(output) }
-        self.subscribers.removeAll()
+        self._state = .fulfilled(output)
+        for subscriber in self._subscribers { subscriber.resolve(output) }
+        self._subscribers.removeAll()
     }
     
-    public func reject(_ failure: Failure) {
-        lock.lock()
-        defer { lock.unlock() }
+    @inlinable public func reject(_ failure: Failure) {
+        self._lock.lock()
+        defer { self._lock.unlock() }
         
-        guard case .pending = self.state else { return }
+        guard case .pending = self._state else { return }
         
-        self.state = .rejected(failure)
-        for subscriber in self.subscribers { subscriber.reject(failure) }
-        self.subscribers.removeAll()
+        self._state = .rejected(failure)
+        for subscriber in self._subscribers { subscriber.reject(failure) }
+        self._subscribers.removeAll()
     }
 
-    public func subscribe(_ resolve: @escaping (Output) -> (), _ reject: @escaping (Failure) -> ()) {
-        lock.lock()
-        defer { lock.unlock() }
+    @inlinable public func subscribe(_ resolve: @escaping (Output) -> (), _ reject: @escaping (Failure) -> ()) {
+        self._lock.lock()
+        defer { self._lock.unlock() }
         
-        switch self.state {
-        case .pending: self.subscribers.append(Subscriber(resolve: resolve, reject: reject))
+        switch self._state {
+        case .pending: self._subscribers.append(Subscriber(resolve: resolve, reject: reject))
         case .fulfilled(let output): resolve(output)
         case .rejected(let failure): reject(failure)
         }
@@ -61,5 +67,7 @@ public final class Promise<Output, Failure: Error> {
 }
 
 extension Promise: CustomStringConvertible {
-    public var description: String { "Promise<\(Output.self), \(Failure.self)>(\(self.state))" }
+    @inlinable public var description: String {
+        "Promise<\(Output.self), \(Failure.self)>(\(self._state))"
+    }
 }

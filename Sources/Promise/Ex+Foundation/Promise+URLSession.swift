@@ -28,7 +28,7 @@ extension URLSession {
             if let error = error {
                 promise.reject(error)
             } else if let data = data, let responce = responce {
-                promise.fulfill((responce, data))
+                promise.resolve((responce, data))
             } else {
                 promise.reject(NSError(domain: "No data or responce", code: 0, userInfo: nil))
             }
