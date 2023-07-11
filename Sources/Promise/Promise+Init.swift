@@ -42,5 +42,14 @@ extension Promise {
         }
         return promise
     }
+    
+    @inlinable public static func endless() -> Promise<Output, Failure> {
+        let promise = Promise()
+        promise.subscribe(
+            {_ in fatalError("This promise should not be resolved.") },
+            {_ in fatalError("This promise should not be rejected.") }
+        )
+        return promise
+    }
 }
 
