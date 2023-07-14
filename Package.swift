@@ -12,7 +12,7 @@ let package = Package(
         .watchOS(.v3)
     ],
     products: [
-        .library(name: "Promise", type: .static, targets: ["Promise"])
+        .library(name: "Promise", targets: ["Promise"])
     ],
     dependencies: [],
     targets: [
