@@ -60,7 +60,7 @@ extension Promise {
         let promise = Promise<(A, B), Failure>()
         
         var outputA: A?, outputB: B?
-        func check() {
+        @inline(__always) func check() {
             guard let outputA = outputA, let outputB = outputB else { return }
             promise.resolve((outputA, outputB))
         }
@@ -74,7 +74,7 @@ extension Promise {
         let promise = Promise<(A, B, C), Failure>()
         
         var outputA: A?, outputB: B?, outputC: C?
-        func check() {
+        @inline(__always) func check() {
             guard let outputA = outputA, let outputB = outputB, let outputC = outputC else { return }
             promise.resolve((outputA, outputB, outputC))
         }
@@ -89,7 +89,7 @@ extension Promise {
         let promise = Promise<(A, B, C, D), Failure>()
         
         var outputA: A?, outputB: B?, outputC: C?, outputD: D?
-        func check() {
+        @inline(__always) func check() {
             guard let outputA = outputA, let outputB = outputB, let outputC = outputC, let outputD = outputD else { return }
             promise.resolve((outputA, outputB, outputC, outputD))
         }
@@ -133,7 +133,7 @@ extension Promise: _PromiseCombineInterface {
     }
     
     @inlinable public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
-        if promises.isEmpty { return Promise<[Output], Failure>.resolve([]) }
+        if promises.isEmpty { return .resolve([]) }
         
         let lock = RecursiveLock()
         let promise = Promise<[Output], Failure>()
@@ -142,28 +142,27 @@ extension Promise: _PromiseCombineInterface {
         var outputs = [Output?](repeating: nil, count: count)
         var dp = [Bool](repeating: false, count: count)
         var fulfilled = 0
-        var hasRejected = false
-        var hasFulfilled = false
+        var hasCompleted = false
         
         for (i, child) in promises.enumerated() {
             child.subscribe({ output in
                 lock.lock(); defer { lock.unlock() }
                 
-                if hasRejected || hasFulfilled { return }
+                if hasCompleted { return }
                 if dp[i] == false {
                     dp[i] = true
                     fulfilled += 1
                 }
                 outputs[i] = output
                 if fulfilled == count {
-                    hasFulfilled = true
+                    hasCompleted = true
                     promise.resolve(outputs as! [Output])
                 }
             }, { failure in
                 lock.lock(); defer { lock.unlock() }
                 
-                if hasRejected || hasFulfilled { return }
-                hasRejected = true
+                if hasCompleted { return }
+                hasCompleted = true
                 promise.reject(failure)
             })
         }
