@@ -39,11 +39,13 @@
 
 #ifdef USE_PTHREAD_AS_LOCK // pthread as lock
 
-void* _Nonnull promise_lock_alloc(void) {
+void* _Nonnull promise_recursive_lock_alloc(void) {
     PROMISE_HANDLE_EXCEPTION_BEGIN
     
     pthread_mutexattr_t attrs;
     pthread_mutexattr_init(&attrs);
+    
+    
     
     PROMISE_HANDLE_PTHREAD_CALL(pthread_mutexattr_settype(&attrs, PTHREAD_MUTEX_RECURSIVE));
 
@@ -56,7 +58,46 @@ void* _Nonnull promise_lock_alloc(void) {
     return mutex;
     
     PROMISE_HANDLE_EXCEPTION_END
+}
+
+void promise_recursive_lock_lock(void* _Nonnull self) {
+    PROMISE_HANDLE_EXCEPTION_BEGIN
     
+    auto mutex = static_cast<pthread_mutex_t*>(self);
+    PROMISE_HANDLE_PTHREAD_CALL(pthread_mutex_lock(mutex));
+    
+    PROMISE_HANDLE_EXCEPTION_END
+}
+
+void promise_recursive_lock_unlock(void* _Nonnull self) {
+    PROMISE_HANDLE_EXCEPTION_BEGIN
+    
+    auto mutex = static_cast<pthread_mutex_t*>(self);
+    PROMISE_HANDLE_PTHREAD_CALL(pthread_mutex_unlock(mutex));
+    
+    PROMISE_HANDLE_EXCEPTION_END
+}
+
+void promise_recursive_lock_dealloc(void* _Nonnull self) {
+    PROMISE_HANDLE_EXCEPTION_BEGIN
+    
+    auto mutex = static_cast<pthread_mutex_t*>(self);
+    PROMISE_HANDLE_PTHREAD_CALL(pthread_mutex_destroy(mutex));
+    delete mutex;
+    
+    PROMISE_HANDLE_EXCEPTION_END
+}
+
+void* _Nonnull promise_lock_alloc(void) {
+    PROMISE_HANDLE_EXCEPTION_BEGIN
+    
+    auto mutex = new pthread_mutex_t();
+    
+    PROMISE_HANDLE_PTHREAD_CALL(pthread_mutex_init(mutex, nullptr));
+    
+    return mutex;
+    
+    PROMISE_HANDLE_EXCEPTION_END
 }
 
 void promise_lock_lock(void* _Nonnull self) {
@@ -87,27 +128,28 @@ void promise_lock_dealloc(void* _Nonnull self) {
     PROMISE_HANDLE_EXCEPTION_END
 }
 
+
 #else // std::mutex as lock
 
-void* _Nonnull promise_lock_alloc(void) {
+void* _Nonnull promise_recursive_lock_alloc(void) {
     PROMISE_HANDLE_EXCEPTION_BEGIN
     return new std::recursive_mutex();
     PROMISE_HANDLE_EXCEPTION_END
 }
 
-void promise_lock_lock(void* _Nonnull self) {
+void promise_recursive_lock_lock(void* _Nonnull self) {
     PROMISE_HANDLE_EXCEPTION_BEGIN
     static_cast<std::recursive_mutex*>(self)->lock();
     PROMISE_HANDLE_EXCEPTION_END
 }
 
-void promise_lock_unlock(void* _Nonnull self) {
+void promise_recursive_lock_unlock(void* _Nonnull self) {
     PROMISE_HANDLE_EXCEPTION_BEGIN
     static_cast<std::recursive_mutex*>(self)->unlock();
     PROMISE_HANDLE_EXCEPTION_END
 }
 
-void promise_lock_dealloc(void* _Nonnull self) {
+void promise_recursive_lock_dealloc(void* _Nonnull self) {
     PROMISE_HANDLE_EXCEPTION_BEGIN
     delete static_cast<std::recursive_mutex*>(self);
     PROMISE_HANDLE_EXCEPTION_END

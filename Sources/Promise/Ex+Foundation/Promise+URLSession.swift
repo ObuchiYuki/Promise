@@ -44,4 +44,5 @@ extension Data {
         URLSession.shared.data(for: url)
     }
 }
+
 #endif

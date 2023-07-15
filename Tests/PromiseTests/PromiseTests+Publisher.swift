@@ -8,7 +8,7 @@
 #if canImport(Combine)
 import XCTest
 import Combine
-@testable import Promise
+import Promise
 
 final class PromiseTestsPublisher: XCTestCase {
     func testPublisherPromise_Just() {

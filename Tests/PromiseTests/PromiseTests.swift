@@ -1,5 +1,5 @@
 import XCTest
-@testable import Promise
+import Promise
 
 struct PromiseTestError: Error {}
 
@@ -11,7 +11,23 @@ extension FixedWidthInteger {
 
 final class PromiseIterationTest: XCTestCase {
     func testPassPromiseToC() {
-        print()
+        let promises = (0..<10000).map{ _ in Promise<Int, Never>.resolve(1) }
+        
+        do {
+            let start = Date()
+            for _ in 0..<100 {
+                Promise<Int, Never>.combineAll(promises).sink{_ in }
+            }
+            print("default", Date().timeIntervalSince(start))
+        }
+        
+        do {
+            let start = Date()
+            for _ in 0..<100 {
+                Promise<Int, Never>.combineAll_fast(promises).sink{_ in }
+            }
+            print("fast", Date().timeIntervalSince(start))
+        }
     }
 }
 

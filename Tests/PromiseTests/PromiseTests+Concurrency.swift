@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import Promise
+import Promise
 
 final class PromiseTestsConcurrency: XCTestCase {
     

@@ -170,4 +170,62 @@ extension Promise: _PromiseCombineInterface {
         return promise
     }
     
+    @inlinable public static func combineAll_fast<T: Collection>(_ promises: T) -> Promise<some Sequence<Output>, Failure>
+        where T.Element == Promise<Output, Failure>
+    {
+        let promise = Promise<_ArrayLike<Output>, Failure>()
+
+        if promises.isEmpty {
+            promise.resolve(_ArrayLike(storage: .init(.allocate(capacity: 0))))
+            return promise
+        }
+        
+        let lock = Lock()
+        let count = promises.count
+        let outputs = UnsafeMutableBufferPointer<Output>.allocate(capacity: count)
+        let dp = UnsafeMutableBufferPointer<Bool>.allocate(capacity: count)
+        dp.initialize(repeating: false)
+        
+        var fulfilled = 0
+        var hasCompleted = false
+        
+        for (i, child) in promises.enumerated() {
+            child.subscribe({ output in
+                lock.lock(); defer { lock.unlock() }
+                
+                if hasCompleted { return }
+                if dp[i] == false {
+                    dp[i] = true
+                    fulfilled += 1
+                }
+                outputs[i] = output
+                if fulfilled == count {
+                    hasCompleted = true
+                    promise.resolve(_ArrayLike(storage: .init(outputs)))
+                }
+            }, { failure in
+                lock.lock(); defer { lock.unlock() }
+                
+                if hasCompleted { return }
+                hasCompleted = true
+                promise.reject(failure)
+            })
+        }
+        
+        return promise
+    }
+
 }
+
+@usableFromInline final class _ArrayLike<Element>: CustomStringConvertible, Sequence {
+    @usableFromInline let storage: UnsafeBufferPointer<Element>
+    
+    @inlinable init(storage: UnsafeBufferPointer<Element>) { self.storage = storage }
+    
+    @inlinable deinit { storage.deallocate() }
+    
+    @inlinable var description: String { storage.map{ $0 }.description }
+    
+    @inlinable func makeIterator() -> some IteratorProtocol<Element> { storage.makeIterator() }
+}
+

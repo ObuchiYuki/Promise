@@ -7,7 +7,7 @@ let package = Package(
     name: "Promise",
     platforms: [
         .iOS(.v10),
-        .macOS(.v10_12),
+        .macOS(.v10_15),
         .tvOS(.v9),
         .watchOS(.v3)
     ],
