@@ -65,8 +65,8 @@ public final class Promise<Output, Failure: Error> {
     
     #if DEBUG
     @inlinable deinit {
-        if case .pending = self.state, !self._subscribers.isEmpty {
-            assertionFailure("Unresolved release of subscribed Promise.")
+        if case .pending = self._state, !self._subscribers.isEmpty {
+            assertionFailure("Unresolved release of Promise.")
         }
     }
     #endif

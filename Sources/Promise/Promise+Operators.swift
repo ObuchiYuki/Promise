@@ -138,10 +138,11 @@ extension Promise {
     @discardableResult
     @inlinable public func tryCatch(_ receiveFailure: @escaping (Failure) throws -> ()) -> Promise<Void, Error> {
         let promise = Promise<Void, Error>()
-        self.subscribe({_ in promise.resolve(()) },
-                       { do { try receiveFailure($0); promise.resolve(()) } catch { promise.reject(error) } }
-        )
+        self.subscribe({_ in promise.resolve(()) }, { failure in
+            do { try receiveFailure(failure); promise.resolve(()) } catch { promise.reject(error) }
+        })
         return promise
+    
     }
 
     @inlinable public func `catch`<ErrorType: Error>(_ errorType: ErrorType.Type, _ receiveFailure: @escaping (ErrorType) -> ()) -> Promise<Output, Failure> {

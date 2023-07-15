@@ -3,9 +3,15 @@ import XCTest
 
 struct PromiseTestError: Error {}
 
+extension FixedWidthInteger {
+    var bitPattern: String {
+        String(self, radix: 2).padding(toLength: self.bitWidth, withPad: " ", startingAt: 0)
+    }
+}
+
 final class PromiseIterationTest: XCTestCase {
     func testPassPromiseToC() {
-        
+        print()
     }
 }
 

@@ -19,50 +19,50 @@ extension PromiseCancel: LocalizedError {}
 #endif
 
 extension Promise {
-    public func cancel(_ cancel: PromiseCancel = PromiseCancel.shared) where Failure == Error {
+    @inlinable public func cancel(_ cancel: PromiseCancel = PromiseCancel.shared) where Failure == Error {
         self.reject(cancel)
     }
     
-    public func cancel(_ cancel: PromiseCancel = PromiseCancel.shared) where Failure == PromiseCancel {
+    @inlinable public func cancel(_ cancel: PromiseCancel = PromiseCancel.shared) where Failure == PromiseCancel {
         self.reject(cancel)
     }
     
-    public func cancel(by canceller: Promise<Void, Never>) -> Promise<Output, Error> {
-        Promise<Output, Error> { resolve, reject in
-            canceller.subscribe({_ in reject(PromiseCancel.shared) }, {_ in})
-            self.subscribe(resolve, reject)
-        }
+    @inlinable public func cancel(by canceller: Promise<Void, Never>) -> Promise<Output, Error> {
+        let promise = Promise<Output, Error>()
+        canceller.subscribe({_ in promise.reject(PromiseCancel.shared) }, {_ in})
+        self.subscribe(promise.resolve, promise.reject)
+        return promise
     }
 
-    public func cancel(by canceller: Promise<Void, Never>, make: @escaping () -> PromiseCancel = { PromiseCancel.shared }) -> Promise<Output, PromiseCancel> where Failure == Never {
-        Promise<Output, PromiseCancel> { resolve, reject in
-            canceller.subscribe({_ in reject(make()) }, {_ in})
-            self.subscribe(resolve, {_ in})
-        }
+    @inlinable public func cancel(by canceller: Promise<Void, Never>, make: @escaping () -> PromiseCancel = { PromiseCancel.shared }) -> Promise<Output, PromiseCancel> where Failure == Never {
+        let promise = Promise<Output, PromiseCancel>()
+        canceller.subscribe({_ in promise.reject(make()) }, {_ in})
+        self.subscribe(promise.resolve, {_ in})
+        return promise
     }
     
     @discardableResult
-    public func catchCancel(by handler: @escaping (PromiseCancel) -> ()) -> Promise<Void, Failure> {
-        Promise<Void, Failure> { resolve, reject in
-            self.subscribe({_ in resolve(()) }, { error in
-                if let error = error as? PromiseCancel {
-                    handler(error)
-                    resolve(())
-                } else {
-                    reject(error)
-                }
-            })
-        }
+    @inlinable public func catchCancel(by handler: @escaping (PromiseCancel) -> ()) -> Promise<Void, Failure> {
+        let promise = Promise<Void, Failure>()
+        self.subscribe({_ in promise.resolve(()) }, { error in
+            if let error = error as? PromiseCancel {
+                handler(error)
+                promise.resolve(())
+            } else {
+                promise.reject(error)
+            }
+        })
+        return promise
     }
     
     @discardableResult
     public func catchCancel(by handler: @escaping (PromiseCancel) -> ()) -> Promise<Void, Never> where Failure == PromiseCancel {
-        Promise<Void, Never> { resolve, reject in
-            self.subscribe({_ in resolve(()) }, { error in
-                handler(error)
-                resolve(())
-            })
-        }
+        let promise = Promise<Void, Never>()
+        self.subscribe({_ in promise.resolve(()) }, { error in
+            handler(error)
+            promise.resolve(())
+        })
+        return promise
     }
 }
 
