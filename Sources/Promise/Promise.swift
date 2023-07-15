@@ -16,7 +16,7 @@ public final class Promise<Output, Failure: Error> {
         @usableFromInline let resolve: (Output) -> ()
         @usableFromInline let reject: (Failure) -> ()
         
-        @usableFromInline init(resolve: @escaping (Output) -> Void, reject: @escaping (Failure) -> Void) {
+        @inlinable init(resolve: @escaping (Output) -> Void, reject: @escaping (Failure) -> Void) {
             self.resolve = resolve
             self.reject = reject
         }
@@ -28,7 +28,7 @@ public final class Promise<Output, Failure: Error> {
     @usableFromInline var _subscribers = [Subscriber]()
     @usableFromInline let _lock = RecursiveLock()
     
-    public init() {}
+    @inlinable public init() {}
     
     @inlinable public func resolve(_ output: Output) {
         self._lock.lock()
@@ -62,6 +62,14 @@ public final class Promise<Output, Failure: Error> {
         case .rejected(let failure): reject(failure)
         }
     }
+    
+    #if DEBUG
+    @inlinable deinit {
+        if case .pending = self.state, !self._subscribers.isEmpty {
+            assertionFailure("Unresolved release of subscribed Promise.")
+        }
+    }
+    #endif
 }
 
 extension Promise: CustomStringConvertible {

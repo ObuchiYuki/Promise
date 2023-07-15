@@ -55,27 +55,27 @@ extension Promise {
 final public class Await {
     @usableFromInline init() {}
     
-    static public func | <T, Failure>(await: Await, promise: Promise<T, Failure>) throws -> T {
+    @inlinable static public func | <T, Failure>(await: Await, promise: Promise<T, Failure>) throws -> T {
         try `await`.execute(promise: promise)
     }
 
-    static public func | <T>(await: Await, promise: Promise<T, Never>) -> T {
+    @inlinable static public func | <T>(await: Await, promise: Promise<T, Never>) -> T {
         `await`.execute(promise: promise)
     }
         
-    public func execute<Output>(promise: Promise<Output, Never>) -> Output {
+    @inlinable public func execute<Output>(promise: Promise<Output, Never>) -> Output {
         let semaphore = DispatchSemaphore(value: 0)
         var output: Output?
-        promise.sink{ output = $0; semaphore.signal() }
+        promise.subscribe({ output = $0; semaphore.signal() }, {_ in})
         semaphore.wait()
         return output!
     }
     
-    public func execute<Output, Failure>(promise: Promise<Output, Failure>) throws -> Output {
+    @inlinable public func execute<Output, Failure>(promise: Promise<Output, Failure>) throws -> Output {
         let semaphore = DispatchSemaphore(value: 0)
         var output: Output?
         var error: Error?
-        promise.sink({ output = $0; semaphore.signal() }, { error = $0; semaphore.signal() })
+        promise.subscribe({ output = $0; semaphore.signal() }, { error = $0; semaphore.signal() })
         semaphore.wait()
         if let error = error { throw error }
         return output!

@@ -10,6 +10,7 @@ extension Promise {
         self.init()
         handler(self.resolve, self.reject)
     }
+    
     @inlinable public convenience init(_ handler: (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) where Failure == Error {
         self.init()
         do { try handler(self.resolve, self.reject) } catch { self.reject(error) }
@@ -40,15 +41,6 @@ extension Promise {
         } catch {
             promise.reject(error)
         }
-        return promise
-    }
-    
-    @inlinable public static func endless() -> Promise<Output, Failure> {
-        let promise = Promise()
-        promise.subscribe(
-            {_ in fatalError("This promise should not be resolved.") },
-            {_ in fatalError("This promise should not be rejected.") }
-        )
         return promise
     }
 }

@@ -9,7 +9,7 @@
 extension Promise where Failure == Never {
     @inlinable public var value: Output {
         @inlinable get async {
-            await withCheckedContinuation{ continuation in
+            await withUnsafeContinuation{ continuation in
                 self.subscribe(continuation.resume(returning:), continuation.resume(throwing:))
             }
         }
@@ -33,7 +33,7 @@ extension Promise where Failure == Never {
 extension Promise {
     @inlinable public var value: Output {
         @inlinable get async throws {
-            try await withCheckedThrowingContinuation{ continuation in
+            try await withUnsafeThrowingContinuation{ continuation in
                 self.sink(continuation.resume(returning:), continuation.resume(throwing:))
             }
         }
