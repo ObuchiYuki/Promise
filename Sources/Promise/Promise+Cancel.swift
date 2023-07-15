@@ -5,14 +5,18 @@
 //  Created by yuki on 2022/01/27.
 //
 
-import Foundation
-
-final public class PromiseCancel: LocalizedError {
+final public class PromiseCancel: Error {
     public static let shared = PromiseCancel()
     public var userInfo = [String: Any?]()
     
     public var errorDescription: String? { "Promise has been cancelled." }
 }
+
+#if canImport(Foundation)
+import Foundation
+
+extension PromiseCancel: LocalizedError {}
+#endif
 
 extension Promise {
     public func cancel(_ cancel: PromiseCancel = PromiseCancel.shared) where Failure == Error {
@@ -30,19 +34,19 @@ extension Promise {
         }
     }
 
-    public func cancel(by canceller: Promise<Void, Never>) -> Promise<Output, PromiseCancel> where Failure == Never {
+    public func cancel(by canceller: Promise<Void, Never>, make: @escaping () -> PromiseCancel = { PromiseCancel.shared }) -> Promise<Output, PromiseCancel> where Failure == Never {
         Promise<Output, PromiseCancel> { resolve, reject in
-            canceller.subscribe({_ in reject(PromiseCancel.shared)}, {_ in})
+            canceller.subscribe({_ in reject(make()) }, {_ in})
             self.subscribe(resolve, {_ in})
         }
     }
     
     @discardableResult
-    public func catchCancel(by handler: @escaping () -> ()) -> Promise<Void, Failure> {
+    public func catchCancel(by handler: @escaping (PromiseCancel) -> ()) -> Promise<Void, Failure> {
         Promise<Void, Failure> { resolve, reject in
             self.subscribe({_ in resolve(()) }, { error in
-                if error is PromiseCancel {
-                    handler()
+                if let error = error as? PromiseCancel {
+                    handler(error)
                     resolve(())
                 } else {
                     reject(error)
@@ -52,10 +56,10 @@ extension Promise {
     }
     
     @discardableResult
-    public func catchCancel(by handler: @escaping () -> ()) -> Promise<Void, Never> where Failure == PromiseCancel {
+    public func catchCancel(by handler: @escaping (PromiseCancel) -> ()) -> Promise<Void, Never> where Failure == PromiseCancel {
         Promise<Void, Never> { resolve, reject in
             self.subscribe({_ in resolve(()) }, { error in
-                handler()
+                handler(error)
                 resolve(())
             })
         }

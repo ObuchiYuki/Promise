@@ -5,8 +5,6 @@
 //  Created by yuki on 2020/10/11.
 //
 
-import CPromiseHelper
-
 public final class Promise<Output, Failure: Error> {
     public enum State {
         case pending

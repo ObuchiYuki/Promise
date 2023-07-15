@@ -18,6 +18,6 @@ let package = Package(
     targets: [
         .target(name: "CPromiseHelper"),
         .target(name: "Promise", dependencies: ["CPromiseHelper"]),
-        .testTarget(name: "PromiseTests", dependencies: [ "Promise" ])
+        .testTarget(name: "PromiseTests", dependencies: ["Promise"])
     ]
 )
