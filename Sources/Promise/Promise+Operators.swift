@@ -63,6 +63,18 @@ extension Promise {
         self.subscribe(promise.resolve, {_ in promise.resolve(value()) })
         return promise
     }
+    
+    @inlinable public func replaceErrorWithNil<T>() -> Promise<Output, Never> where Output == Optional<T> {
+        let promise = Promise<Output, Never>()
+        self.subscribe(promise.resolve, {_ in promise.resolve(nil) })
+        return promise
+    }
+    
+    @inlinable public func replaceErrorWithNil() -> Promise<Output?, Never> {
+        let promise = Promise<Output?, Never>()
+        self.subscribe(promise.resolve, {_ in promise.resolve(nil) })
+        return promise
+    }
         
     @inlinable public func tryReplaceError(_ tranceform: @escaping (Failure) throws -> Output) -> Promise<Output, Error> {
         let promise = Promise<Output, Error>()

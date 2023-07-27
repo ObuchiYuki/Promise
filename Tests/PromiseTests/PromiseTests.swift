@@ -9,6 +9,12 @@ extension FixedWidthInteger {
     }
 }
 
+infix operator ^^
+
+func ^^ (lhs: Bool, rhs: Bool) -> Bool {
+    return lhs != rhs
+}
+
 final class PromiseIterationTest: XCTestCase {
     func testPassPromiseToC() {
         let promises = (0..<10000).map{ _ in Promise<Int, Never>.resolve(1) }
