@@ -2,6 +2,43 @@ import XCTest
 import Promise
 
 final class PromiseTestsMultithread: XCTestCase {
+    
+    func testPromiseThreadMove_withAsync() {
+        let end = expectation(description: "")
+        
+        XCTAssert(Thread.isMainThread)
+        
+        Promise.detached{
+            _ = await Promise<Int, Never>.resolve(1).value
+        }
+        .peek{ XCTAssert(!Thread.isMainThread) }
+        .receive(on: .main)
+        .peek{ XCTAssert(Thread.isMainThread) }
+        .receive(on: .global())
+        .peek{ XCTAssert(!Thread.isMainThread) }
+        .finally{ end.fulfill() }
+        
+        wait(for: [end], timeout: 1)
+    }
+
+    func testPromiseThreadMove() {
+        let end = expectation(description: "")
+        
+        XCTAssert(Thread.isMainThread)
+        
+        Promise.detached{
+            _ = await Promise<Int, Never>.resolve(1).value
+        }
+        .peek{ XCTAssert(!Thread.isMainThread) }
+        .receive(on: .main)
+        .peek{ XCTAssert(Thread.isMainThread) }
+        .receive(on: .global())
+        .peek{ XCTAssert(!Thread.isMainThread) }
+        .finally{ end.fulfill() }
+        
+        wait(for: [end], timeout: 1)
+    }
+    
     func testData() {
         let end = expectation(description: "")
         
