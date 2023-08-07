@@ -63,13 +63,14 @@ public final class Promise<Output, Failure: Error> {
         }
     }
     
-    #if DEBUG
     @inlinable deinit {
+#if DEBUG
         if case .pending = self._state, !self._subscribers.isEmpty {
             assertionFailure("Unresolved release of Promise.")
         }
+#endif
+        self._lock.deallocate()
     }
-    #endif
 }
 
 extension Promise: CustomStringConvertible {

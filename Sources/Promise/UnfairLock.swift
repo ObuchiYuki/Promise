@@ -7,7 +7,7 @@
 
 import Darwin
 
-@usableFromInline final class Lock {
+@usableFromInline struct Lock {
     @usableFromInline var mutex: UnsafeMutablePointer<pthread_mutex_t>
     
     @inlinable @inline(__always)
@@ -29,13 +29,13 @@ import Darwin
     }
     
     @inlinable @inline(__always)
-    deinit {
+    func deallocate() {
         guard pthread_mutex_destroy(mutex) == 0 else { handleError("pthread_mutex_destroy") }
         mutex.deallocate()
     }
 }
 
-@usableFromInline final class RecursiveLock {
+@usableFromInline struct RecursiveLock {
     @usableFromInline var mutex: UnsafeMutablePointer<pthread_mutex_t>
     
     @inlinable @inline(__always)
@@ -63,7 +63,7 @@ import Darwin
     }
     
     @inlinable @inline(__always)
-    deinit {
+    func deallocate() {
         guard pthread_mutex_destroy(mutex) == 0 else { handleError("pthread_mutex_destroy") }
         mutex.deallocate()
     }

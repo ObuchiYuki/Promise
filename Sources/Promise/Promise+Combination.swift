@@ -157,6 +157,7 @@ extension Promise: _PromiseCombineInterface {
                 if fulfilled == count {
                     hasCompleted = true
                     promise.resolve(outputs as! [Output])
+                    lock.deallocate()
                 }
             }, { failure in
                 lock.lock(); defer { lock.unlock() }
@@ -164,6 +165,7 @@ extension Promise: _PromiseCombineInterface {
                 if hasCompleted { return }
                 hasCompleted = true
                 promise.reject(failure)
+                lock.deallocate()
             })
         }
         
@@ -202,6 +204,7 @@ extension Promise: _PromiseCombineInterface {
                 if fulfilled == count {
                     hasCompleted = true
                     promise.resolve(_ArrayLike(storage: .init(outputs)))
+                    lock.deallocate()
                 }
             }, { failure in
                 lock.lock(); defer { lock.unlock() }
@@ -209,6 +212,7 @@ extension Promise: _PromiseCombineInterface {
                 if hasCompleted { return }
                 hasCompleted = true
                 promise.reject(failure)
+                lock.deallocate()
             })
         }
         

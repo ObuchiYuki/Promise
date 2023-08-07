@@ -37,48 +37,4 @@ extension Promise {
         self.receive(on: { queue.async(execute: $0) })
     }
 }
-
-@discardableResult
-@inlinable public func dispatchHandler<Output>(on queue: DispatchQueue = .global(), _ block: @escaping (Await) -> Output) -> Promise<Output, Never> {
-    Promise<Output, Never>{ resolve, _ in
-        queue.async { resolve(block(Await())) }
-    }
-}
-
-@discardableResult
-@inlinable public func dispatchHandler<Output>(on queue: DispatchQueue = .global(), _ block: @escaping (Await) throws -> Output) -> Promise<Output, Error> {
-    Promise<Output, Error>{ resolve, reject in
-        queue.async { do { resolve(try block(Await())) } catch { reject(error) } }
-    }
-}
-
-final public class Await {
-    @usableFromInline init() {}
-    
-    @inlinable static public func | <T, Failure>(await: Await, promise: Promise<T, Failure>) throws -> T {
-        try `await`.execute(promise: promise)
-    }
-
-    @inlinable static public func | <T>(await: Await, promise: Promise<T, Never>) -> T {
-        `await`.execute(promise: promise)
-    }
-        
-    @inlinable public func execute<Output>(promise: Promise<Output, Never>) -> Output {
-        let semaphore = DispatchSemaphore(value: 0)
-        var output: Output?
-        promise.subscribe({ output = $0; semaphore.signal() }, {_ in})
-        semaphore.wait()
-        return output!
-    }
-    
-    @inlinable public func execute<Output, Failure>(promise: Promise<Output, Failure>) throws -> Output {
-        let semaphore = DispatchSemaphore(value: 0)
-        var output: Output?
-        var error: Error?
-        promise.subscribe({ output = $0; semaphore.signal() }, { error = $0; semaphore.signal() })
-        semaphore.wait()
-        if let error = error { throw error }
-        return output!
-    }
-}
 #endif

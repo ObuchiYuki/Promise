@@ -5,9 +5,10 @@
 //  Created by yuki on 2022/01/27.
 //
 
-final public class PromiseCancel: Error {
-    public static let shared = PromiseCancel()
+public struct PromiseCancel: Error {
     public var userInfo = [String: Any?]()
+    
+    public init() {}
     
     public var errorDescription: String? { "Promise has been cancelled." }
 }
@@ -19,22 +20,22 @@ extension PromiseCancel: LocalizedError {}
 #endif
 
 extension Promise {
-    @inlinable public func cancel(_ cancel: PromiseCancel = PromiseCancel.shared) where Failure == Error {
+    @inlinable public func cancel(_ cancel: PromiseCancel = PromiseCancel()) where Failure == Error {
         self.reject(cancel)
     }
     
-    @inlinable public func cancel(_ cancel: PromiseCancel = PromiseCancel.shared) where Failure == PromiseCancel {
+    @inlinable public func cancel(_ cancel: PromiseCancel = PromiseCancel()) where Failure == PromiseCancel {
         self.reject(cancel)
     }
     
     @inlinable public func cancel(by canceller: Promise<Void, Never>) -> Promise<Output, Error> {
         let promise = Promise<Output, Error>()
-        canceller.subscribe({_ in promise.reject(PromiseCancel.shared) }, {_ in})
+        canceller.subscribe({_ in promise.reject(PromiseCancel()) }, {_ in})
         self.subscribe(promise.resolve, promise.reject)
         return promise
     }
 
-    @inlinable public func cancel(by canceller: Promise<Void, Never>, make: @escaping () -> PromiseCancel = { PromiseCancel.shared }) -> Promise<Output, PromiseCancel> where Failure == Never {
+    @inlinable public func cancel(by canceller: Promise<Void, Never>, make: @escaping () -> PromiseCancel = { PromiseCancel() }) -> Promise<Output, PromiseCancel> where Failure == Never {
         let promise = Promise<Output, PromiseCancel>()
         canceller.subscribe({_ in promise.reject(make()) }, {_ in})
         self.subscribe(promise.resolve, {_ in})
