@@ -7,7 +7,7 @@ final class PromiseTestsMultithread: XCTestCase {
         let end = expectation(description: "")
         
         XCTAssert(Thread.isMainThread)
-        
+                
         Promise.detached{
             _ = await Promise<Int, Never>.resolve(1).value
         }
@@ -53,10 +53,11 @@ final class PromiseTestsMultithread: XCTestCase {
     }
     
     func testMultithreadCombine() {
+        let N = 1000
         let end = expectation(description: "")
-        let promises = (0..<100).map{_ in Promise<Int, Never>() }
+        let promises = (0..<N).map{_ in Promise<Int, Never>() }
         
-        for i in 0..<100 {
+        for i in 0..<N {
             DispatchQueue.global().asyncAfter(deadline: .now() + 0.01) {
                 promises[i].resolve(i)
             }
@@ -64,7 +65,7 @@ final class PromiseTestsMultithread: XCTestCase {
         
         promises.combineAll()
             .sink{
-                XCTAssertEqual($0, (0..<100).map{ $0 })
+                XCTAssertEqual($0, (0..<N).map{ $0 })
                 end.fulfill()
             }
         

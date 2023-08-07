@@ -5,37 +5,79 @@
 //  Created by yuki on 2023/06/28.
 //
 
-import CPromiseHelper
+import Darwin
 
 @usableFromInline final class Lock {
-    @usableFromInline let opaque: UnsafeMutableRawPointer
+    @usableFromInline var mutex: UnsafeMutablePointer<pthread_mutex_t>
     
     @inlinable @inline(__always)
-    init() { self.opaque = promise_lock_alloc() }
+    init() {
+        self.mutex = UnsafeMutablePointer<pthread_mutex_t>.allocate(capacity: 1);
+        guard pthread_mutex_init(mutex, nil) == 0 else {
+            handleError("pthread_mutex_init")
+        }
+    }
     
     @inlinable @inline(__always)
-    func lock() { promise_lock_lock(opaque) }
+    func lock() {
+        guard pthread_mutex_lock(mutex) == 0 else { handleError("pthread_mutex_lock") }
+    }
     
     @inlinable @inline(__always)
-    func unlock() { promise_lock_unlock(opaque) }
+    func unlock() {
+        guard pthread_mutex_unlock(mutex) == 0 else { handleError("pthread_mutex_unlock") }
+    }
     
     @inlinable @inline(__always)
-    deinit { promise_lock_dealloc(opaque) }
+    deinit {
+        guard pthread_mutex_destroy(mutex) == 0 else { handleError("pthread_mutex_destroy") }
+        mutex.deallocate()
+    }
 }
 
-
 @usableFromInline final class RecursiveLock {
-    @usableFromInline let opaque: UnsafeMutableRawPointer
+    @usableFromInline var mutex: UnsafeMutablePointer<pthread_mutex_t>
     
     @inlinable @inline(__always)
-    init() { self.opaque = promise_recursive_lock_alloc() }
+    init() {
+        var attrs = pthread_mutexattr_t(); pthread_mutexattr_init(&attrs)
+        guard pthread_mutexattr_settype(&attrs, PTHREAD_MUTEX_RECURSIVE) == 0 else {
+            handleError("pthread_mutexattr_settype")
+        }
+
+        self.mutex = UnsafeMutablePointer<pthread_mutex_t>.allocate(capacity: 1);
+        guard pthread_mutex_init(mutex, &attrs) == 0 else {
+            handleError("pthread_mutex_init")
+        }
+        pthread_mutexattr_destroy(&attrs);
+    }
     
     @inlinable @inline(__always)
-    func lock() { promise_recursive_lock_lock(opaque) }
+    func lock() {
+        guard pthread_mutex_lock(mutex) == 0 else { handleError("pthread_mutex_lock") }
+    }
     
     @inlinable @inline(__always)
-    func unlock() { promise_recursive_lock_unlock(opaque) }
+    func unlock() {
+        guard pthread_mutex_unlock(mutex) == 0 else { handleError("pthread_mutex_unlock") }
+    }
     
     @inlinable @inline(__always)
-    deinit { promise_recursive_lock_dealloc(opaque) }
+    deinit {
+        guard pthread_mutex_destroy(mutex) == 0 else { handleError("pthread_mutex_destroy") }
+        mutex.deallocate()
+    }
+}
+
+@inlinable
+func handleError(_ funcname: @autoclosure () -> StaticString) -> Never {
+    switch errno {
+    case EAGAIN: fatalError("\(funcname()) failed: EAGAIN")
+    case ENOMEM: fatalError("\(funcname()) failed: ENOMEM")
+    case EPERM: fatalError("\(funcname()) failed: EPERM")
+    case EBUSY: fatalError("\(funcname()) failed: EBUSY")
+    case EINVAL: fatalError("\(funcname()) failed: EINVAL")
+    case EDEADLK: fatalError("\(funcname()) failed: EDEADLK")
+    default: fatalError("\(funcname()) failed")
+    }
 }

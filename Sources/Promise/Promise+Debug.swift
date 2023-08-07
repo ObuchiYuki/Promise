@@ -5,6 +5,8 @@
 //  Created by yuki on 2021/08/23.
 //
 
+import Darwin
+
 struct PrintTarget: TextOutputStream {
     func write(_ string: String) { Swift.print(string) }
 }
@@ -38,14 +40,12 @@ extension Promise {
     }
 }
 
-import CPromiseHelper
-
 extension Promise {
     public func breakpoint(_ receiveOutput: ((Output) -> Bool)? = nil, _ receiveFailure: ((Failure) -> Bool)? = nil) -> Promise<Output, Failure> {
         self.subscribe({ output in
-            if receiveOutput?(output) == true { __stopInDebugger() }
+            if receiveOutput?(output) == true { raise(SIGTRAP) }
         }, { failure in
-            if receiveFailure?(failure) == true { __stopInDebugger() }
+            if receiveFailure?(failure) == true { raise(SIGTRAP) }
         })
         return self
     }
