@@ -146,9 +146,9 @@ extension Promise: _PromiseCombineInterface {
         
         for (i, child) in promises.enumerated() {
             child.subscribe({ output in
-                lock.lock(); defer { lock.unlock() }
+                lock.lock()
                 
-                if hasCompleted { return }
+                if hasCompleted { return lock.unlock() }
                 if dp[i] == false {
                     dp[i] = true
                     fulfilled += 1
@@ -157,14 +157,18 @@ extension Promise: _PromiseCombineInterface {
                 if fulfilled == count {
                     hasCompleted = true
                     promise.resolve(outputs as! [Output])
+                    lock.unlock()
                     lock.deallocate()
+                } else {
+                    lock.unlock()
                 }
             }, { failure in
-                lock.lock(); defer { lock.unlock() }
+                lock.lock()
                 
-                if hasCompleted { return }
+                if hasCompleted { return lock.unlock() }
                 hasCompleted = true
                 promise.reject(failure)
+                lock.unlock()
                 lock.deallocate()
             })
         }
@@ -193,9 +197,9 @@ extension Promise: _PromiseCombineInterface {
         
         for (i, child) in promises.enumerated() {
             child.subscribe({ output in
-                lock.lock(); defer { lock.unlock() }
+                lock.lock()
                 
-                if hasCompleted { return }
+                if hasCompleted { return lock.unlock() }
                 if dp[i] == false {
                     dp[i] = true
                     fulfilled += 1
@@ -204,14 +208,18 @@ extension Promise: _PromiseCombineInterface {
                 if fulfilled == count {
                     hasCompleted = true
                     promise.resolve(_ArrayLike(storage: .init(outputs)))
+                    lock.unlock()
                     lock.deallocate()
+                } else {
+                    lock.unlock()
                 }
             }, { failure in
-                lock.lock(); defer { lock.unlock() }
+                lock.lock()
                 
-                if hasCompleted { return }
+                if hasCompleted { return lock.unlock() }
                 hasCompleted = true
                 promise.reject(failure)
+                lock.unlock()
                 lock.deallocate()
             })
         }

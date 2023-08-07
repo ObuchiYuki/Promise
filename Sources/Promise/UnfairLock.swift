@@ -78,6 +78,6 @@ func handleError(_ funcname: @autoclosure () -> StaticString) -> Never {
     case EBUSY: fatalError("\(funcname()) failed: EBUSY")
     case EINVAL: fatalError("\(funcname()) failed: EINVAL")
     case EDEADLK: fatalError("\(funcname()) failed: EDEADLK")
-    default: fatalError("\(funcname()) failed")
+    default: fatalError("\(funcname()) failed: \(errno)")
     }
 }
