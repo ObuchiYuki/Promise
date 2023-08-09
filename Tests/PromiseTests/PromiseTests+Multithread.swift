@@ -1,6 +1,13 @@
 import XCTest
 import Promise
 
+final class PromiseTestExtension: XCTestCase {
+    func testWaitUntilExit() throws {
+        Promise.wait(for: 0.1)
+            .waitUntilExit(self)
+    }
+}
+
 final class PromiseTestsMultithread: XCTestCase {
     
     func testPromiseThreadMove_withAsync() {

@@ -3,18 +3,6 @@ import Promise
 
 struct PromiseTestError: Error {}
 
-extension FixedWidthInteger {
-    var bitPattern: String {
-        String(self, radix: 2).padding(toLength: self.bitWidth, withPad: " ", startingAt: 0)
-    }
-}
-
-infix operator ^^
-
-func ^^ (lhs: Bool, rhs: Bool) -> Bool {
-    return lhs != rhs
-}
-
 final class PromiseIterationTest: XCTestCase {
     func testPassPromiseToC() {
         let promises = (0..<10000).map{ _ in Promise<Int, Never>.resolve(1) }

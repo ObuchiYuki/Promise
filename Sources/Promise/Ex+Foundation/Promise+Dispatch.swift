@@ -9,31 +9,31 @@
 import Foundation
 
 extension Promise {
-    public static func dispatch(on queue: DispatchQueue = .global(), _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) -> ()) -> Promise<Output, Failure> {
-        Promise<Output, Failure> { resolve, reject in
-            queue.async { handler(resolve, reject) }
-        }
+    @inlinable public static func dispatch(on queue: DispatchQueue = .global(), _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) -> ()) -> Promise<Output, Failure> {
+        let promise = Promise<Output, Failure>()
+        queue.async { handler(promise.resolve, promise.reject) }
+        return promise
     }
     
-    public static func dispatch(on queue: DispatchQueue = .global(), _ output: @escaping () -> Output) -> Promise<Output, Failure> where Failure == Never {
-        Promise<Output, Never> { resolve, _ in
-            queue.async { resolve(output()) }
-        }
+    @inlinable public static func dispatch(on queue: DispatchQueue = .global(), _ output: @escaping () -> Output) -> Promise<Output, Failure> where Failure == Never {
+        let promise = Promise<Output, Failure>()
+        queue.async { promise.resolve(output()) }
+        return promise
     }
         
-    public static func tryDispatch(on queue: DispatchQueue = .global(), _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) -> Promise<Output, Failure> where Failure == Error {
-        Promise<Output, Failure> { resolve, reject in
-            queue.async { do { try handler(resolve, reject) } catch { reject(error) } }
-        }
+    @inlinable public static func tryDispatch(on queue: DispatchQueue = .global(), _ handler: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) -> Promise<Output, Failure> where Failure == Error {
+        let promise = Promise<Output, Failure>()
+        queue.async { do { try handler(promise.resolve, promise.reject) } catch { promise.reject(error) } }
+        return promise
     }
     
-    public static func tryDispatch(on queue: DispatchQueue = .global(), _ output: @escaping () throws -> Output) -> Promise<Output, Failure> where Failure == Error {
-        Promise<Output, Failure> { resolve, reject in
-            queue.async { do { resolve(try output()) } catch { reject(error) } }
-        }
+    @inlinable public static func tryDispatch(on queue: DispatchQueue = .global(), _ output: @escaping () throws -> Output) -> Promise<Output, Failure> where Failure == Error {
+        let promise = Promise<Output, Failure>()
+        queue.async { do { promise.resolve(try output()) } catch { promise.reject(error) } }
+        return promise
     }
     
-    public func receive(on queue: DispatchQueue) -> Promise<Output, Failure> {
+    @inlinable public func receive(on queue: DispatchQueue) -> Promise<Output, Failure> {
         self.receive(on: { queue.async(execute: $0) })
     }
 }
