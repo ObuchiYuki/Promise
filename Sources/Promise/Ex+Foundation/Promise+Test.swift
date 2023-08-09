@@ -10,7 +10,7 @@ import XCTest
 
 extension Promise {
     public func waitUntilExit(_ testCase: XCTestCase, timeout: TimeInterval = 1) {
-        let expectation = testCase.expectation(description: "Promise")
+        let expectation = testCase.expectation(description: "wait on promise")
         self.finally{ expectation.fulfill() }
         testCase.wait(for: [expectation], timeout: timeout)
     }
