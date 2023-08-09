@@ -11,7 +11,9 @@ import XCTest
 extension Promise {
     public func waitUntilExit(_ testCase: XCTestCase, timeout: TimeInterval = 1) {
         let expectation = testCase.expectation(description: "Promise should exit")
-        self.finally{ expectation.fulfill() }
+        self
+            .catch{ XCTFail("Promise exited with error: \($0)") }
+            .finally{ expectation.fulfill() }
         testCase.wait(for: [expectation], timeout: timeout)
     }
 }
