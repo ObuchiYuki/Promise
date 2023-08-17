@@ -10,7 +10,7 @@ import XCTest
 import Combine
 import Promise
 
-final class PromiseTestsPublisher: XCTestCase {
+final class PromisePublisherTests: XCTestCase {
     func testPublisherPromise_Just() {
         var fulfilled = false
         Just(123).firstValue()

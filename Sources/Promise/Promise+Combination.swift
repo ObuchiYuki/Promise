@@ -132,10 +132,15 @@ extension Promise: _PromiseCombineInterface {
         return promise
     }
     
+    @inlinable public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<Void, Failure> where Output == Void {
+        let result = self.combineAll(promises) as Promise<[Void], Failure>
+        return result.eraseToVoid()
+    }
+    
     @inlinable public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
         if promises.isEmpty { return .resolve([]) }
         
-        let lock = RecursiveLock()
+        var lock = Lock()
         let promise = Promise<[Output], Failure>()
         
         let count = promises.count
@@ -158,7 +163,6 @@ extension Promise: _PromiseCombineInterface {
                     hasCompleted = true
                     promise.resolve(outputs as! [Output])
                     lock.unlock()
-                    lock.deallocate()
                 } else {
                     lock.unlock()
                 }
@@ -169,7 +173,6 @@ extension Promise: _PromiseCombineInterface {
                 hasCompleted = true
                 promise.reject(failure)
                 lock.unlock()
-                lock.deallocate()
             })
         }
         
@@ -186,7 +189,7 @@ extension Promise: _PromiseCombineInterface {
             return promise
         }
         
-        let lock = Lock()
+        var lock = Lock()
         let count = promises.count
         let outputs = UnsafeMutableBufferPointer<Output>.allocate(capacity: count)
         let dp = UnsafeMutableBufferPointer<Bool>.allocate(capacity: count)
@@ -208,8 +211,8 @@ extension Promise: _PromiseCombineInterface {
                 if fulfilled == count {
                     hasCompleted = true
                     promise.resolve(_ArrayLike(storage: .init(outputs)))
+                    dp.deallocate()
                     lock.unlock()
-                    lock.deallocate()
                 } else {
                     lock.unlock()
                 }
@@ -219,8 +222,8 @@ extension Promise: _PromiseCombineInterface {
                 if hasCompleted { return lock.unlock() }
                 hasCompleted = true
                 promise.reject(failure)
+                dp.deallocate()
                 lock.unlock()
-                lock.deallocate()
             })
         }
         

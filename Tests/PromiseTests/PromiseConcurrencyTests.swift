@@ -8,7 +8,7 @@
 import XCTest
 import Promise
 
-final class PromiseTestsConcurrency: XCTestCase {
+final class PromiseConcurrencyTests: XCTestCase {
     
     func testAsyncPromise() async {
         _ = await Promise.combineAll([
@@ -41,22 +41,5 @@ final class PromiseTestsConcurrency: XCTestCase {
             throwed = true
         }
         XCTAssert(throwed)
-    }
-
-    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
-    func testMakePromiseFromAsyncContext() throws {
-//        let end = expectation(description: "end")
-//        
-//        let waitPromise = Promise{
-//            await Promise.wait(for: .milliseconds(1)).value
-//        }
-//        
-//        waitPromise
-//            .assertNoFailure()
-//            .sink{
-//                end.fulfill()
-//            }
-//        
-//        wait(for: [end])
     }
 }

@@ -26,7 +26,7 @@ public final class Promise<Output, Failure: Error> {
 
     @usableFromInline var _state = State.pending
     @usableFromInline var _subscribers = [Subscriber]()
-    @usableFromInline let _lock = RecursiveLock()
+    @usableFromInline var _lock = RecursiveLock()
     
     @inlinable public init() {}
     
@@ -69,7 +69,6 @@ public final class Promise<Output, Failure: Error> {
             assertionFailure("Unresolved release of Promise.")
         }
 #endif
-        self._lock.deallocate()
     }
 }
 

@@ -178,6 +178,17 @@ extension Promise {
         return self
     }
     
+    @discardableResult
+    @inlinable public func tryFinally(_ receive: @escaping () throws -> ()) -> Promise<Output, Error> {
+        let promise = Promise<Output, Error>()
+        self.subscribe({ output in
+            do { try receive(); promise.resolve(output) } catch { promise.reject(error) }
+        }, { failure in
+            do { try receive(); promise.reject(failure) } catch { promise.reject(error) }
+        })
+        return promise
+    }
+    
     @inlinable public func sink(_ receiveOutput: @escaping (Output) -> (), _ receiveFailure: @escaping (Failure) -> ()) {
         self.subscribe(receiveOutput, receiveFailure)
     }

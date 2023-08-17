@@ -5,79 +5,77 @@
 //  Created by yuki on 2023/06/28.
 //
 
-import Darwin
+#if canImport(Foundation)
+import Foundation
 
 @usableFromInline struct Lock {
-    @usableFromInline var mutex: UnsafeMutablePointer<pthread_mutex_t>
+    @usableFromInline static let attr: UnsafePointer<pthread_mutexattr_t> = {
+        let attr = UnsafeMutablePointer<pthread_mutexattr_t>.allocate(capacity: 1)
+        _do(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
+        _do(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_ERRORCHECK), "pthread_mutexattr_settype")
+        return UnsafePointer(attr)
+    }()
+
+    @usableFromInline var mutex = pthread_mutex_t()
     
     @inlinable @inline(__always)
     init() {
-        self.mutex = UnsafeMutablePointer<pthread_mutex_t>.allocate(capacity: 1);
-        guard pthread_mutex_init(mutex, nil) == 0 else {
-            handleError("pthread_mutex_init")
-        }
+        #if DEBUG
+        _do(pthread_mutex_init(&mutex, Lock.attr), "pthread_mutex_init")
+        #else
+        _do(pthread_mutex_init(&mutex, nil), "pthread_mutex_init")
+        #endif
     }
     
     @inlinable @inline(__always)
-    func lock() {
-        guard pthread_mutex_lock(mutex) == 0 else { handleError("pthread_mutex_lock") }
+    mutating func lock() {
+        _do(pthread_mutex_lock(&mutex), "pthread_mutex_lock")
     }
     
     @inlinable @inline(__always)
-    func unlock() {
-        guard pthread_mutex_unlock(mutex) == 0 else { handleError("pthread_mutex_unlock") }
-    }
-    
-    @inlinable @inline(__always)
-    func deallocate() {
-        guard pthread_mutex_destroy(mutex) == 0 else { handleError("pthread_mutex_destroy") }
-        mutex.deallocate()
+    mutating func unlock() {
+        _do(pthread_mutex_unlock(&mutex), "pthread_mutex_unlock")
     }
 }
 
 @usableFromInline struct RecursiveLock {
-    @usableFromInline var mutex: UnsafeMutablePointer<pthread_mutex_t>
+    @usableFromInline static let attr = {
+        let attr = UnsafeMutablePointer<pthread_mutexattr_t>.allocate(capacity: 1)
+        _do(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
+        _do(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_RECURSIVE), "pthread_mutexattr_settype")
+        #if DEBUG
+        _do(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_ERRORCHECK), "pthread_mutexattr_settype")
+        #endif
+        return UnsafePointer(attr)
+    }()
+    
+    @usableFromInline var mutex = pthread_mutex_t()
     
     @inlinable @inline(__always)
     init() {
-        var attrs = pthread_mutexattr_t(); pthread_mutexattr_init(&attrs)
-        guard pthread_mutexattr_settype(&attrs, PTHREAD_MUTEX_RECURSIVE) == 0 else {
-            handleError("pthread_mutexattr_settype")
-        }
-
-        self.mutex = UnsafeMutablePointer<pthread_mutex_t>.allocate(capacity: 1);
-        guard pthread_mutex_init(mutex, &attrs) == 0 else {
-            handleError("pthread_mutex_init")
-        }
-        pthread_mutexattr_destroy(&attrs);
+        _do(pthread_mutex_init(&mutex, RecursiveLock.attr), "pthread_mutex_init")
     }
     
     @inlinable @inline(__always)
-    func lock() {
-        guard pthread_mutex_lock(mutex) == 0 else { handleError("pthread_mutex_lock") }
+    mutating func lock() {
+        _do(pthread_mutex_lock(&mutex), "pthread_mutex_lock")
     }
     
     @inlinable @inline(__always)
-    func unlock() {
-        guard pthread_mutex_unlock(mutex) == 0 else { handleError("pthread_mutex_unlock") }
-    }
-    
-    @inlinable @inline(__always)
-    func deallocate() {
-        guard pthread_mutex_destroy(mutex) == 0 else { handleError("pthread_mutex_destroy") }
-        mutex.deallocate()
+    mutating func unlock() {
+        _do(pthread_mutex_unlock(&mutex), "pthread_mutex_unlock")
     }
 }
 
-@inlinable
-func handleError(_ funcname: @autoclosure () -> StaticString) -> Never {
-    switch errno {
-    case EAGAIN: fatalError("\(funcname()) failed: EAGAIN")
-    case ENOMEM: fatalError("\(funcname()) failed: ENOMEM")
-    case EPERM: fatalError("\(funcname()) failed: EPERM")
-    case EBUSY: fatalError("\(funcname()) failed: EBUSY")
-    case EINVAL: fatalError("\(funcname()) failed: EINVAL")
-    case EDEADLK: fatalError("\(funcname()) failed: EDEADLK")
-    default: fatalError("\(funcname()) failed: \(errno)")
-    }
+@inlinable @_transparent
+func _do(_ res: Int32, _ funcname: @autoclosure () -> StaticString) {
+    if res == 0 { return }
+    let message = String(utf8String: strerror(res)) ?? ""
+    fatalError("\(funcname()) failed: \(message)")
 }
+
+#else
+
+#error("Unsuppowrted platform")
+
+#endif

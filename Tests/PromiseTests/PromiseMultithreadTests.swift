@@ -1,15 +1,7 @@
 import XCTest
 import Promise
 
-final class PromiseTestExtension: XCTestCase {
-    func testWaitUntilExit() throws {
-        Promise.wait(for: 0.1)
-            .waitUntilExit(self)
-    }
-}
-
-final class PromiseTestsMultithread: XCTestCase {
-    
+final class PromiseMultithreadTests: XCTestCase {
     func testPromiseThreadMove_withAsync() {
         let end = expectation(description: "")
         
@@ -44,19 +36,6 @@ final class PromiseTestsMultithread: XCTestCase {
         .finally{ end.fulfill() }
         
         wait(for: [end], timeout: 1)
-    }
-    
-    func testData() {
-        let end = expectation(description: "")
-        
-        let url = URL(fileURLWithPath: "/Users/yuki/Developer/Python/pdfmake/PDFUnpack.py")
-        Data.async(contentsOf: url)
-            .map{ String(data: $0, encoding: .utf8) }
-            .peek{_ in }
-            .catch{_ in XCTFail() }
-            .finally{ end.fulfill() }
-        
-        wait(for: [end])
     }
     
     func testMultithreadCombine() {
