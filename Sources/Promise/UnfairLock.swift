@@ -18,7 +18,7 @@ import Foundation
 
     @usableFromInline var mutex = pthread_mutex_t()
     
-    @inlinable @inline(__always)
+    @inlinable @inline(__always) 
     init() {
         #if DEBUG
         _do(pthread_mutex_init(&mutex, Lock.attr), "pthread_mutex_init")

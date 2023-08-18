@@ -12,15 +12,7 @@ public final class Promise<Output, Failure: Error> {
         case rejected(Failure)
     }
     
-    @usableFromInline struct Subscriber {
-        @usableFromInline let resolve: (Output) -> ()
-        @usableFromInline let reject: (Failure) -> ()
-        
-        @inlinable init(resolve: @escaping (Output) -> Void, reject: @escaping (Failure) -> Void) {
-            self.resolve = resolve
-            self.reject = reject
-        }
-    }
+    @usableFromInline typealias Subscriber = (resolve: (Output) -> (), reject: (Failure) -> ())
     
     @inlinable public var state: State { _state }
 
@@ -30,7 +22,18 @@ public final class Promise<Output, Failure: Error> {
     
     @inlinable public init() {}
     
-    @inlinable public func resolve(_ output: Output) {
+#if DEBUG
+    @inlinable deinit {
+        if case .pending = self._state, !self._subscribers.isEmpty {
+            assertionFailure("Unresolved release of Promise.")
+        }
+    }
+#endif
+}
+
+extension Promise {
+    @inlinable @_transparent
+    public func resolve(_ output: Output) {
         self._lock.lock()
         defer { self._lock.unlock() }
         
@@ -41,7 +44,8 @@ public final class Promise<Output, Failure: Error> {
         self._subscribers.removeAll()
     }
     
-    @inlinable public func reject(_ failure: Failure) {
+    @inlinable @_transparent
+    public func reject(_ failure: Failure) {
         self._lock.lock()
         defer { self._lock.unlock() }
         
@@ -52,7 +56,8 @@ public final class Promise<Output, Failure: Error> {
         self._subscribers.removeAll()
     }
 
-    @inlinable public func subscribe(_ resolve: @escaping (Output) -> (), _ reject: @escaping (Failure) -> ()) {
+    @inlinable @_transparent
+    public func subscribe(_ resolve: @escaping (Output) -> (), _ reject: @escaping (Failure) -> ()) {
         self._lock.lock()
         defer { self._lock.unlock() }
         
@@ -61,14 +66,6 @@ public final class Promise<Output, Failure: Error> {
         case .fulfilled(let output): resolve(output)
         case .rejected(let failure): reject(failure)
         }
-    }
-    
-    @inlinable deinit {
-#if DEBUG
-        if case .pending = self._state, !self._subscribers.isEmpty {
-            assertionFailure("Unresolved release of Promise.")
-        }
-#endif
     }
 }
 

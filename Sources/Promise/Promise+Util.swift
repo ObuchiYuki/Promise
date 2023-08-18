@@ -6,7 +6,8 @@
 //
 
 extension Promise {
-    @inlinable public var result: Result<Output, Failure>? {
+    @inlinable @_transparent
+    public var result: Result<Output, Failure>? {
         if case .fulfilled(let output) = self._state {
             return .success(output)
         }
@@ -16,7 +17,8 @@ extension Promise {
         return nil
     }
     
-    @inlinable public var isSettled: Bool {
+    @inlinable @_transparent
+    public var isSettled: Bool {
         if case .pending = self._state { return true }
         return false
     }
