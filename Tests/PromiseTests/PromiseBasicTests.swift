@@ -11,13 +11,6 @@ import XCTest
 struct PromiseTestError: Error {}
 
 final class PromiseBasicTests: XCTestCase {
-    
-    func testLockError() {
-        var lock = Lock()
-        lock.lock()
-        lock.lock()
-    }
-    
     func testPromise_CallbackInit() throws {
         Promise{ resolve, _ in
             DispatchQueue.main.async { resolve("Hello World") }

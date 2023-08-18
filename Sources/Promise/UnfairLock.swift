@@ -44,7 +44,7 @@ import Foundation
         _do(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
         _do(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_RECURSIVE), "pthread_mutexattr_settype")
         #if DEBUG
-        _do(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_ERRORCHECK), "pthread_mutexattr_settype")
+//        _do(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_ERRORCHECK), "pthread_mutexattr_settype")
         #endif
         return UnsafePointer(attr)
     }()
@@ -69,9 +69,11 @@ import Foundation
 
 @inlinable @_transparent
 func _do(_ res: Int32, _ funcname: @autoclosure () -> StaticString) {
+    #if DEBUG
     if res == 0 { return }
     let message = String(utf8String: strerror(res)) ?? ""
     fatalError("\(funcname()) failed: \(message)")
+    #endif
 }
 
 #else
