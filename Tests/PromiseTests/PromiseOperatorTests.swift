@@ -10,7 +10,7 @@ import XCTest
 
 struct PromiseTestError: Error {}
 
-final class PromiseBasicTests: XCTestCase {
+final class PromiseOperatorTests: XCTestCase {
     func testPromise_CallbackInit() throws {
         Promise{ resolve, _ in
             DispatchQueue.main.async { resolve("Hello World") }
