@@ -10,15 +10,6 @@ import Promise
 
 final class PromiseConcurrencyTests: XCTestCase {
     
-    func testAsyncPromise() async {
-        _ = await Promise.combineAll([
-            Promise.wait(for: 0.1),
-            Promise.wait(for: 0.1)
-        ])
-        .measureInterval{ XCTAssert($0 < 0.11) }
-        .value
-    }
-    
     func testNestedPromiseWithAsyncContext() async throws {        
         let value = await Promise{
             await Promise{

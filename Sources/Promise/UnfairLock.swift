@@ -14,11 +14,13 @@ import Glibc // for Linux
 #endif
 
 @usableFromInline struct Lock {
+    #if DEBUG
     @usableFromInline static let attr: UnsafePointer<pthread_mutexattr_t> = {
         let attr = UnsafeMutablePointer<pthread_mutexattr_t>.allocate(capacity: 1)
         _do(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
         return UnsafePointer(attr)
     }()
+    #endif
 
     @usableFromInline var mutex = pthread_mutex_t()
     
@@ -68,7 +70,7 @@ import Glibc // for Linux
     }
 }
 
-@inlinable @_transparent
+@inlinable @inline(__always) @_transparent
 func _do(_ res: Int32, _ funcname: @autoclosure () -> StaticString) {
     #if DEBUG
     if res == 0 { return }

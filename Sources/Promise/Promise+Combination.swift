@@ -132,11 +132,6 @@ extension Promise: _PromiseCombineInterface {
         return promise
     }
     
-    @inlinable public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<Void, Failure> where Output == Void {
-        let result = self.combineAll(promises) as Promise<[Void], Failure>
-        return result.eraseToVoid()
-    }
-    
     @inlinable public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
         if promises.isEmpty { return .resolve([]) }
         
@@ -162,6 +157,46 @@ extension Promise: _PromiseCombineInterface {
                 if fulfilled == count {
                     hasCompleted = true
                     promise.resolve(outputs as! [Output])
+                    lock.unlock()
+                } else {
+                    lock.unlock()
+                }
+            }, { failure in
+                lock.lock()
+                
+                if hasCompleted { return lock.unlock() }
+                hasCompleted = true
+                promise.reject(failure)
+                lock.unlock()
+            })
+        }
+        
+        return promise
+    }
+
+    @inlinable public static func combineAll(_ promises: [Promise<Void, Failure>]) -> Promise<Void, Failure> where Output == Void {
+        if promises.isEmpty { return .resolve() }
+        
+        var lock = Lock()
+        let promise = Promise<Void, Failure>()
+        
+        let count = promises.count
+        var dp = [Bool](repeating: false, count: count)
+        var fulfilled = 0
+        var hasCompleted = false
+        
+        for (i, child) in promises.enumerated() {
+            child.subscribe({ output in
+                lock.lock()
+                
+                if hasCompleted { return lock.unlock() }
+                if dp[i] == false {
+                    dp[i] = true
+                    fulfilled += 1
+                }
+                if fulfilled == count {
+                    hasCompleted = true
+                    promise.resolve()
                     lock.unlock()
                 } else {
                     lock.unlock()

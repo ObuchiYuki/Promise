@@ -22,13 +22,13 @@ public final class Promise<Output, Failure: Error> {
     
     @inlinable public init() {}
     
-#if DEBUG
+    #if DEBUG
     @inlinable deinit {
         if case .pending = self._state, !self._subscribers.isEmpty {
             assertionFailure("Unresolved release of Promise.")
         }
     }
-#endif
+    #endif
 }
 
 extension Promise {
@@ -62,7 +62,7 @@ extension Promise {
         defer { self._lock.unlock() }
         
         switch self._state {
-        case .pending: self._subscribers.append(Subscriber(resolve: resolve, reject: reject))
+        case .pending: self._subscribers.append((resolve: resolve, reject: reject))
         case .fulfilled(let output): resolve(output)
         case .rejected(let failure): reject(failure)
         }

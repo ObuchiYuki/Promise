@@ -6,14 +6,23 @@
 //
 
 import XCTest
-@testable import Promise
+import Promise
 
 struct PromiseTestError: Error {}
 
-final class PromiseOperatorTests: XCTestCase {
-    func testPromiseSize() {
-        print(MemoryLayout<RecursiveLock>.size)
+final class PromiseSpeedTests: XCTestCase {
+    func testSpeedCheck() {
+        let N = Int(1e7)
+        print(N)
+        let start = Date()
+        for _ in 0..<N {
+            Promise<Int, Never>().resolve(1)
+        }
+        print(Date().timeIntervalSince(start))
     }
+}
+
+final class PromiseOperatorTests: XCTestCase {
     
     func testPromise_CallbackInit() throws {
         Promise{ resolve, _ in

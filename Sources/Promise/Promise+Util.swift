@@ -19,7 +19,7 @@ extension Promise {
     
     @inlinable @_transparent
     public var isSettled: Bool {
-        if case .pending = self._state { return true }
-        return false
+        if case .pending = self._state { return false }
+        return true
     }
 }
