@@ -57,7 +57,7 @@ extension Promise {
     }
 
     @inlinable @_transparent
-    public func subscribe(_ resolve: @escaping (Output) -> (), _ reject: @escaping (Failure) -> ()) {
+    func subscribe(_ resolve: @escaping (Output) -> (), _ reject: @escaping (Failure) -> ()) {
         self._lock.lock()
         defer { self._lock.unlock() }
         

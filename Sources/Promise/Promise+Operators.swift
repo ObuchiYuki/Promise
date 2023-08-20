@@ -7,35 +7,35 @@
 
 extension Promise {
     @inlinable @_transparent
-    public func map<T>(_ tranceform: @escaping (Output) -> T) -> Promise<T, Failure> {
+    public func map<T>(@_implicitSelfCapture _ tranceform: @escaping (Output) -> T) -> Promise<T, Failure> {
         let promise = Promise<T, Failure>()
         self.subscribe({ promise.resolve(tranceform($0)) }, promise.reject)
         return promise
     }
     
     @inlinable @_transparent
-    public func flatMap<T>(_ tranceform: @escaping (Output) -> Promise<T, Failure>) -> Promise<T, Failure> {
+    public func flatMap<T>(@_implicitSelfCapture _ tranceform: @escaping (Output) -> Promise<T, Failure>) -> Promise<T, Failure> {
         let promise = Promise<T, Failure>()
         self.subscribe({ tranceform($0).subscribe(promise.resolve, promise.reject) }, promise.reject)
         return promise
     }
     
     @inlinable @_transparent
-    public func flatMap<T>(_ tranceform: @escaping (Output, @escaping (T) -> (), @escaping (Failure)->()) -> ()) -> Promise<T, Failure> {
+    public func flatMap<T>(@_implicitSelfCapture _ tranceform: @escaping (Output, @escaping (T) -> (), @escaping (Failure)->()) -> ()) -> Promise<T, Failure> {
         let promise = Promise<T, Failure>()
         self.subscribe({ tranceform($0, promise.resolve, promise.reject) }, promise.reject)
         return promise
     }
     
     @inlinable @_transparent
-    public func tryMap<T>(_ tranceform: @escaping (Output) throws -> T) -> Promise<T, Error> {
+    public func tryMap<T>(@_implicitSelfCapture _ tranceform: @escaping (Output) throws -> T) -> Promise<T, Error> {
         let promise = Promise<T, Error>()
         self.subscribe({ do { try promise.resolve(tranceform($0)) } catch { promise.reject(error) } }, promise.reject)
         return promise
     }
     
     @inlinable @_transparent
-    public func tryFlatMap<T>(_ tranceform: @escaping (Output) throws -> Promise<T, Error>) -> Promise<T, Error> {
+    public func tryFlatMap<T>(@_implicitSelfCapture _ tranceform: @escaping (Output) throws -> Promise<T, Error>) -> Promise<T, Error> {
         let promise = Promise<T, Error>()
         self.subscribe({
             do { try tranceform($0).subscribe(promise.resolve, promise.reject) } catch { promise.reject(error) }
@@ -44,7 +44,7 @@ extension Promise {
     }
     
     @inlinable @_transparent
-    public func tryFlatMap<T>(_ tranceform: @escaping (Output, @escaping (T) -> (), @escaping (Failure)->()) throws -> ()) -> Promise<T, Error> {
+    public func tryFlatMap<T>(@_implicitSelfCapture _ tranceform: @escaping (Output, @escaping (T) -> (), @escaping (Failure)->()) throws -> ()) -> Promise<T, Error> {
         let promise = Promise<T, Error>()
         self.subscribe({
             do { try tranceform($0, promise.resolve, promise.reject) } catch { promise.reject(error) }
@@ -53,21 +53,21 @@ extension Promise {
     }
     
     @inlinable @_transparent
-    public func mapError<T>(_ tranceform: @escaping (Failure) -> T) -> Promise<Output, T> {
+    public func mapError<T>(@_implicitSelfCapture _ tranceform: @escaping (Failure) -> T) -> Promise<Output, T> {
         let promise = Promise<Output, T>()
         self.subscribe(promise.resolve, { promise.reject(tranceform($0)) })
         return promise
     }
     
     @inlinable @_transparent
-    public func replaceError(_ tranceform: @escaping (Failure) -> Output) -> Promise<Output, Never> {
+    public func replaceError(@_implicitSelfCapture _ tranceform: @escaping (Failure) -> Output) -> Promise<Output, Never> {
         let promise = Promise<Output, Never>()
         self.subscribe(promise.resolve, { promise.resolve(tranceform($0)) })
         return promise
     }
     
     @inlinable @_transparent
-    public func replaceError(with value: @autoclosure @escaping () -> Output) -> Promise<Output, Never> {
+    public func replaceError(@_implicitSelfCapture with value: @autoclosure @escaping () -> Output) -> Promise<Output, Never> {
         let promise = Promise<Output, Never>()
         self.subscribe(promise.resolve, {_ in promise.resolve(value()) })
         return promise
@@ -88,7 +88,7 @@ extension Promise {
     }
         
     @inlinable @_transparent
-    public func tryReplaceError(_ tranceform: @escaping (Failure) throws -> Output) -> Promise<Output, Error> {
+    public func tryReplaceError(@_implicitSelfCapture _ tranceform: @escaping (Failure) throws -> Output) -> Promise<Output, Error> {
         let promise = Promise<Output, Error>()
         self.subscribe(promise.resolve, {
             do { try promise.resolve(tranceform($0)) } catch { promise.reject(error) }
@@ -118,26 +118,26 @@ extension Promise {
     }
 
     @inlinable @_transparent
-    public func receive(on callback: @escaping (@escaping () -> ()) -> ()) -> Promise<Output, Failure> {
+    public func receive(@_implicitSelfCapture on callback: @escaping (@escaping () -> ()) -> ()) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
         self.subscribe({ o in callback{ promise.resolve(o) } }, { f in callback{ promise.reject(f) } })
         return promise
     }
     
     @inlinable @_transparent
-    public func peek(_ receiveOutput: @escaping (Output) -> ()) -> Promise<Output, Failure> {
+    public func peek(@_implicitSelfCapture _ receiveOutput: @escaping (Output) -> ()) -> Promise<Output, Failure> {
         self.subscribe(receiveOutput, {_ in})
         return self
     }
     
     @inlinable @_transparent
-    public func peekError(_ receiveFailure: @escaping (Failure) -> ()) -> Promise<Output, Failure> {
+    public func peekError(@_implicitSelfCapture _ receiveFailure: @escaping (Failure) -> ()) -> Promise<Output, Failure> {
         self.subscribe({_ in}, receiveFailure)
         return self
     }
     
     @inlinable @_transparent
-    public func tryPeek(_ receiveOutput: @escaping (Output) throws -> ()) -> Promise<Output, Error> {
+    public func tryPeek(@_implicitSelfCapture _ receiveOutput: @escaping (Output) throws -> ()) -> Promise<Output, Error> {
         let promise = Promise<Output, Error>()
         self.subscribe({ output in
             do { try receiveOutput(output); promise.resolve(output) } catch { promise.reject(error) }
@@ -146,14 +146,14 @@ extension Promise {
     }
     
     @inlinable @_transparent
-    public func flatPeek<T>(_ tranceform: @escaping (Output) -> Promise<T, Failure>) -> Promise<Output, Failure> {
+    public func flatPeek<T>(@_implicitSelfCapture _ tranceform: @escaping (Output) -> Promise<T, Failure>) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
         self.subscribe({ output in tranceform(output).subscribe({_ in promise.resolve(output) }, promise.reject) }, promise.reject)
         return promise
     }
 
     @inlinable @_transparent
-    public func tryFlatPeek<T>(_ tranceform: @escaping (Output) throws -> Promise<T, Failure>) -> Promise<Output, Error> {
+    public func tryFlatPeek<T>(@_implicitSelfCapture _ tranceform: @escaping (Output) throws -> Promise<T, Failure>) -> Promise<Output, Error> {
         let promise = Promise<Output, Error>()
         self.subscribe({ output in
             do { try tranceform(output).subscribe({_ in promise.resolve(output) }, promise.reject) } catch { promise.reject(error) }
@@ -163,7 +163,7 @@ extension Promise {
     
     @discardableResult
     @inlinable @_transparent
-    public func `catch`(_ receiveFailure: @escaping (Failure) -> ()) -> Promise<Void, Never> {
+    public func `catch`(@_implicitSelfCapture _ receiveFailure: @escaping (Failure) -> ()) -> Promise<Void, Never> {
         let promise = Promise<Void, Never>()
         self.subscribe({_ in promise.resolve(()) }, { receiveFailure($0); promise.resolve(()) })
         return promise
@@ -171,7 +171,7 @@ extension Promise {
     
     @discardableResult
     @inlinable @_transparent
-    public func tryCatch(_ receiveFailure: @escaping (Failure) throws -> ()) -> Promise<Void, Error> {
+    public func tryCatch(@_implicitSelfCapture _ receiveFailure: @escaping (Failure) throws -> ()) -> Promise<Void, Error> {
         let promise = Promise<Void, Error>()
         self.subscribe({_ in promise.resolve(()) }, { failure in
             do { try receiveFailure(failure); promise.resolve(()) } catch { promise.reject(error) }
@@ -181,7 +181,7 @@ extension Promise {
     }
 
     @inlinable @_transparent
-    public func `catch`<ErrorType: Error>(_ errorType: ErrorType.Type, _ receiveFailure: @escaping (ErrorType) -> ()) -> Promise<Output, Failure> {
+    public func `catch`<ErrorType: Error>(_ errorType: ErrorType.Type, @_implicitSelfCapture _ receiveFailure: @escaping (ErrorType) -> ()) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
         self.subscribe(promise.resolve, { failure in
             if let error = failure as? ErrorType { receiveFailure(error) }
@@ -199,14 +199,14 @@ extension Promise {
     
     @discardableResult
     @inlinable @_transparent
-    public func finally(_ receive: @escaping () -> ()) -> Promise<Output, Failure> {
+    public func finally(@_implicitSelfCapture _ receive: @escaping () -> ()) -> Promise<Output, Failure> {
         self.subscribe({_ in receive() }, {_ in receive() })
         return self
     }
     
     @discardableResult
     @inlinable @_transparent
-    public func tryFinally(_ receive: @escaping () throws -> ()) -> Promise<Output, Error> {
+    public func tryFinally(@_implicitSelfCapture _ receive: @escaping () throws -> ()) -> Promise<Output, Error> {
         let promise = Promise<Output, Error>()
         self.subscribe({ output in
             do { try receive(); promise.resolve(output) } catch { promise.reject(error) }
@@ -217,12 +217,12 @@ extension Promise {
     }
     
     @inlinable @_transparent
-    public func sink(_ receiveOutput: @escaping (Output) -> (), _ receiveFailure: @escaping (Failure) -> ()) {
+    public func sink(@_implicitSelfCapture _ receiveOutput: @escaping (Output) -> (), @_implicitSelfCapture _ receiveFailure: @escaping (Failure) -> ()) {
         self.subscribe(receiveOutput, receiveFailure)
     }
     
     @inlinable @_transparent
-    public func sink(_ receiveOutput: @escaping (Output) -> ()) where Failure == Never {
+    public func sink(@_implicitSelfCapture _ receiveOutput: @escaping (Output) -> ()) where Failure == Never {
         self.subscribe(receiveOutput, {_ in})
     }
     

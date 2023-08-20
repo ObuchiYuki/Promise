@@ -5,14 +5,18 @@
 //  Created by yuki on 2023/06/28.
 //
 
-#if canImport(Foundation)
-import Foundation
+#if canImport(Darwin)
+import Darwin // for macOS, iOS, tvOS, watchOS
+#elseif canImport(Glibc)
+import Glibc // for Linux
+#else
+#error("Unsupported platform")
+#endif
 
 @usableFromInline struct Lock {
     @usableFromInline static let attr: UnsafePointer<pthread_mutexattr_t> = {
         let attr = UnsafeMutablePointer<pthread_mutexattr_t>.allocate(capacity: 1)
         _do(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
-        _do(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_ERRORCHECK), "pthread_mutexattr_settype")
         return UnsafePointer(attr)
     }()
 
@@ -43,9 +47,6 @@ import Foundation
         let attr = UnsafeMutablePointer<pthread_mutexattr_t>.allocate(capacity: 1)
         _do(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
         _do(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_RECURSIVE), "pthread_mutexattr_settype")
-        #if DEBUG
-//        _do(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_ERRORCHECK), "pthread_mutexattr_settype")
-        #endif
         return UnsafePointer(attr)
     }()
     
@@ -71,13 +72,7 @@ import Foundation
 func _do(_ res: Int32, _ funcname: @autoclosure () -> StaticString) {
     #if DEBUG
     if res == 0 { return }
-    let message = String(utf8String: strerror(res)) ?? ""
+    let message = String(validatingUTF8: strerror(res)) ?? ""
     fatalError("\(funcname()) failed: \(message)")
     #endif
 }
-
-#else
-
-#error("Unsuppowrted platform")
-
-#endif

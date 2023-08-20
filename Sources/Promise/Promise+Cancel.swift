@@ -35,7 +35,7 @@ extension Promise {
         return promise
     }
 
-    @inlinable public func cancel(by canceller: Promise<Void, Never>, make: @escaping () -> PromiseCancel = { PromiseCancel() }) -> Promise<Output, PromiseCancel> where Failure == Never {
+    @inlinable public func cancel(by canceller: Promise<Void, Never>, @_implicitSelfCapture make: @escaping () -> PromiseCancel = { PromiseCancel() }) -> Promise<Output, PromiseCancel> where Failure == Never {
         let promise = Promise<Output, PromiseCancel>()
         canceller.subscribe({_ in promise.reject(make()) }, {_ in})
         self.subscribe(promise.resolve, {_ in})
@@ -43,7 +43,7 @@ extension Promise {
     }
     
     @discardableResult
-    @inlinable public func catchCancel(by handler: @escaping (PromiseCancel) -> ()) -> Promise<Void, Failure> {
+    @inlinable public func catchCancel(@_implicitSelfCapture by handler: @escaping (PromiseCancel) -> ()) -> Promise<Void, Failure> {
         let promise = Promise<Void, Failure>()
         self.subscribe({_ in promise.resolve(()) }, { error in
             if let error = error as? PromiseCancel {
@@ -57,7 +57,7 @@ extension Promise {
     }
     
     @discardableResult
-    public func catchCancel(by handler: @escaping (PromiseCancel) -> ()) -> Promise<Void, Never> where Failure == PromiseCancel {
+    public func catchCancel(@_implicitSelfCapture by handler: @escaping (PromiseCancel) -> ()) -> Promise<Void, Never> where Failure == PromiseCancel {
         let promise = Promise<Void, Never>()
         self.subscribe({_ in promise.resolve(()) }, { error in
             handler(error)

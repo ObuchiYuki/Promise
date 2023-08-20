@@ -30,7 +30,7 @@ extension Promise {
         return self
     }
     
-    public func measureInterval(_ receiveOutput: @escaping (TimeInterval) -> (), _ receiveFailure: @escaping (TimeInterval) -> ()) -> Promise<Output, Failure> {
+    public func measureInterval(@_implicitSelfCapture _ receiveOutput: @escaping (TimeInterval) -> (), @_implicitSelfCapture _ receiveFailure: @escaping (TimeInterval) -> ()) -> Promise<Output, Failure> {
         let startDate = Date()
         
         self.subscribe({ _ in
@@ -42,7 +42,7 @@ extension Promise {
         return self
     }
     
-    public func measureInterval(_ receiveOutput: @escaping (TimeInterval) -> ()) -> Promise<Output, Failure> where Failure == Never {
+    public func measureInterval(@_implicitSelfCapture _ receiveOutput: @escaping (TimeInterval) -> ()) -> Promise<Output, Failure> where Failure == Never {
         let startDate = Date()
         
         self.subscribe({ _ in

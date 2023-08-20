@@ -11,6 +11,8 @@ import Combine
 import Promise
 
 final class PromisePublisherTests: XCTestCase {
+    var objectBag = Set<AnyCancellable>()
+    
     func testPublisherPromise_Just() {
         var fulfilled = false
         Just(123).firstValue()
@@ -41,6 +43,19 @@ final class PromisePublisherTests: XCTestCase {
             }
             .catch{_ in XCTFail() }
         XCTAssert(fulfilled)
+    }
+    
+    func testPromisePublisher() {
+        let promise = Promise<Int, Never>()
+        
+        var value: Int? = nil
+        promise.publisher()
+            .sink{ value = $0 }
+            .store(in: &objectBag)
+        
+        XCTAssertEqual(value, nil)
+        promise.resolve(100)
+        XCTAssertEqual(value, 100)
     }
 }
 

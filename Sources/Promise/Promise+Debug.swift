@@ -5,13 +5,15 @@
 //  Created by yuki on 2021/08/23.
 //
 
-import Darwin
 
-struct PrintTarget: TextOutputStream {
-    func write(_ string: String) { Swift.print(string) }
+@usableFromInline struct PrintTarget: TextOutputStream {
+    @usableFromInline func write(_ string: String) { Swift.print(string) }
+    
+    @inlinable init() {}
 }
 
 extension Promise {
+    @inlinable @_transparent
     public func assertNoFailure(_ prefix: String = "", file: StaticString = #file, line: UInt = #line) -> Promise<Output, Never> {
         Promise<Output, Never>{ resolve, _ in
             self.subscribe(resolve, { error in
@@ -21,11 +23,13 @@ extension Promise {
         }
     }
     
+    @inlinable @_transparent
     public func print(_ prefix: String = "") -> Promise<Output, Failure> {
         var target = PrintTarget()
         return self.print(prefix, to: &target)
     }
     
+    @inlinable @_transparent
     public func print<Target: TextOutputStream>(_ prefix: String = "", to target: inout Target) -> Promise<Output, Failure> {
         var target = target
         let prefix = prefix.isEmpty ? "" : "\(prefix): "
@@ -40,8 +44,12 @@ extension Promise {
     }
 }
 
+#if canImport(Darwin)
+import Darwin
+
 extension Promise {
-    public func breakpoint(_ receiveOutput: ((Output) -> Bool)? = nil, _ receiveFailure: ((Failure) -> Bool)? = nil) -> Promise<Output, Failure> {
+    @inlinable @_transparent
+    public func breakpoint(@_implicitSelfCapture _ receiveOutput: ((Output) -> Bool)? = nil, @_implicitSelfCapture _ receiveFailure: ((Failure) -> Bool)? = nil) -> Promise<Output, Failure> {
         self.subscribe({ output in
             if receiveOutput?(output) == true { raise(SIGTRAP) }
         }, { failure in
@@ -50,11 +58,13 @@ extension Promise {
         return self
     }
 
+    @inlinable @_transparent
     public func breakpointOnError(_ prefix: String = "") -> Promise<Output, Failure> {
         var target = PrintTarget()
         return self.breakpointOnError(prefix, to: &target)
     }
     
+    @inlinable @_transparent
     public func breakpointOnError<Target: TextOutputStream>(_ prefix: String = "", to target: inout Target) -> Promise<Output, Failure> {
         var target = target
         let prefix = prefix.isEmpty ? "" : "\(prefix): "
@@ -65,3 +75,4 @@ extension Promise {
         })
     }
 }
+#endif

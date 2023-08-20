@@ -11,6 +11,10 @@ import XCTest
 struct PromiseTestError: Error {}
 
 final class PromiseOperatorTests: XCTestCase {
+    func testPromiseSize() {
+        print(MemoryLayout<RecursiveLock>.size)
+    }
+    
     func testPromise_CallbackInit() throws {
         Promise{ resolve, _ in
             DispatchQueue.main.async { resolve("Hello World") }

@@ -7,13 +7,13 @@
 
 extension Promise {
     @inlinable @_transparent
-    public convenience init(_ handler: (@escaping (Output) -> (), @escaping (Failure) -> ()) -> ()) {
+    public convenience init(@_implicitSelfCapture _ handler: (@escaping (Output) -> (), @escaping (Failure) -> ()) -> ()) {
         self.init()
         handler(self.resolve, self.reject)
     }
     
     @inlinable @_transparent
-    public convenience init(_ handler: (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) where Failure == Error {
+    public convenience init(@_implicitSelfCapture _ handler: (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) where Failure == Error {
         self.init()
         do { try handler(self.resolve, self.reject) } catch { self.reject(error) }
     }

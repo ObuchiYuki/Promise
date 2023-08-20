@@ -229,7 +229,6 @@ extension Promise: _PromiseCombineInterface {
         
         return promise
     }
-
 }
 
 @usableFromInline final class _ArrayLike<Element>: CustomStringConvertible, Sequence {
