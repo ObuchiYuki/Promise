@@ -17,7 +17,7 @@ import Glibc // for Linux
     #if DEBUG
     @usableFromInline static let attr: UnsafePointer<pthread_mutexattr_t> = {
         let attr = UnsafeMutablePointer<pthread_mutexattr_t>.allocate(capacity: 1)
-        _do(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
+        _HANDLE_PTHREAD_CALL(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
         return UnsafePointer(attr)
     }()
     #endif
@@ -27,28 +27,28 @@ import Glibc // for Linux
     @inlinable @inline(__always) 
     init() {
         #if DEBUG
-        _do(pthread_mutex_init(&mutex, Lock.attr), "pthread_mutex_init")
+        _HANDLE_PTHREAD_CALL(pthread_mutex_init(&mutex, Lock.attr), "pthread_mutex_init")
         #else
-        _do(pthread_mutex_init(&mutex, nil), "pthread_mutex_init")
+        _HANDLE_PTHREAD_CALL(pthread_mutex_init(&mutex, nil), "pthread_mutex_init")
         #endif
     }
     
     @inlinable @inline(__always)
     mutating func lock() {
-        _do(pthread_mutex_lock(&mutex), "pthread_mutex_lock")
+        _HANDLE_PTHREAD_CALL(pthread_mutex_lock(&mutex), "pthread_mutex_lock")
     }
     
     @inlinable @inline(__always)
     mutating func unlock() {
-        _do(pthread_mutex_unlock(&mutex), "pthread_mutex_unlock")
+        _HANDLE_PTHREAD_CALL(pthread_mutex_unlock(&mutex), "pthread_mutex_unlock")
     }
 }
 
 @usableFromInline struct RecursiveLock {
     @usableFromInline static let attr = {
         let attr = UnsafeMutablePointer<pthread_mutexattr_t>.allocate(capacity: 1)
-        _do(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
-        _do(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_RECURSIVE), "pthread_mutexattr_settype")
+        _HANDLE_PTHREAD_CALL(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
+        _HANDLE_PTHREAD_CALL(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_RECURSIVE), "pthread_mutexattr_settype")
         return UnsafePointer(attr)
     }()
     
@@ -56,25 +56,25 @@ import Glibc // for Linux
     
     @inlinable @inline(__always)
     init() {
-        _do(pthread_mutex_init(&mutex, RecursiveLock.attr), "pthread_mutex_init")
+        _HANDLE_PTHREAD_CALL(pthread_mutex_init(&mutex, RecursiveLock.attr), "pthread_mutex_init")
     }
     
     @inlinable @inline(__always)
     mutating func lock() {
-        _do(pthread_mutex_lock(&mutex), "pthread_mutex_lock")
+        _HANDLE_PTHREAD_CALL(pthread_mutex_lock(&mutex), "pthread_mutex_lock")
     }
     
     @inlinable @inline(__always)
     mutating func unlock() {
-        _do(pthread_mutex_unlock(&mutex), "pthread_mutex_unlock")
+        _HANDLE_PTHREAD_CALL(pthread_mutex_unlock(&mutex), "pthread_mutex_unlock")
     }
 }
 
 @inlinable @inline(__always) @_transparent
-func _do(_ res: Int32, _ funcname: @autoclosure () -> StaticString) {
+func _HANDLE_PTHREAD_CALL(_ res: Int32, _ funcname: @autoclosure () -> StaticString) {
     #if DEBUG
-    if res == 0 { return }
-    let message = String(validatingUTF8: strerror(res)) ?? ""
-    fatalError("\(funcname()) failed: \(message)")
+    if res != 0 {
+        fatalError("\(funcname()) failed: \(String(validatingUTF8: strerror(res)) ?? "Unkown Error")")
+    }
     #endif
 }
