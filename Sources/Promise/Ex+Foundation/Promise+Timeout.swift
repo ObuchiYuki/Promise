@@ -8,10 +8,10 @@
 #if canImport(Foundation)
 import Foundation
 
-public struct PromiseTimeoutError: LocalizedError {
+public struct PromiseTimeoutError: Error, CustomStringConvertible {
     public let timeoutInterval: TimeInterval
     
-    public var errorDescription: String { "PromiseTimeoutError: Timeout interval \(timeoutInterval) s exceeded." }
+    public var description: String { "PromiseTimeoutError: Timeout interval \(timeoutInterval) s exceeded." }
 }
 
 extension Promise {
