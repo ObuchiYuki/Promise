@@ -15,24 +15,15 @@ public struct PromiseTimeoutError: LocalizedError {
 }
 
 extension Promise {
-    public func timeout(with timeoutInterval: TimeInterval) -> Promise<Output, Error> {
-        Promise<Output, Error>{ resolve, reject in
-            self.subscribe(resolve, reject)
+    public func timeout(_ interval: TimeInterval, on queue: DispatchQueue = .global()) -> Promise<Output, Error> {
+        let promise = Promise<Output, Error>()
+        self.subscribe(promise.resolve, promise.reject)
             
-            Timer.scheduledTimer(withTimeInterval: timeoutInterval, repeats: false) { timer in
-                reject(PromiseTimeoutError(timeoutInterval: timeoutInterval))
-            }
+        queue.asyncAfter(deadline: .now() + interval) {
+            promise.reject(PromiseTimeoutError(timeoutInterval: interval))
         }
-    }
-    
-    public func timeout(with timeoutInterval: TimeInterval) -> Promise<Output, PromiseTimeoutError> where Failure == Never {
-        Promise<Output, PromiseTimeoutError>{ resolve, reject in
-            self.subscribe(resolve, {_ in})
-            
-            Timer.scheduledTimer(withTimeInterval: timeoutInterval, repeats: false) { timer in
-                reject(PromiseTimeoutError(timeoutInterval: timeoutInterval))
-            }
-        }
+        
+        return promise
     }
 }
 #endif
