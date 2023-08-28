@@ -19,6 +19,12 @@ extension Promise {
     }
     
     @inlinable @_transparent
+    public convenience init(_ promise: Promise<Output, Failure>) {
+        self.init()
+        promise.subscribe(self.resolve(_:), self.reject(_:))
+    }
+    
+    @inlinable @_transparent
     public static func resolve(_ output: Output) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
         promise.resolve(output)
