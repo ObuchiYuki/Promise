@@ -14,7 +14,6 @@ let package = Package(
     products: [
         .library(name: "Promise", targets: ["Promise"])
     ],
-    dependencies: [],
     targets: [
         .target(name: "Promise"),
         .testTarget(name: "PromiseTests", dependencies: ["Promise"])

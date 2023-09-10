@@ -230,4 +230,13 @@ extension Promise {
     public func resolve() where Output == Void {
         self.resolve(())
     }
+    
+    @inlinable @_transparent
+    public func resolve(_ output: () throws -> Output) where Failure == Error {
+        do {
+            self.resolve(try output())
+        } catch {
+            self.reject(error)
+        }
+    }
 }
