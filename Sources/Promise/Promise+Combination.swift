@@ -264,6 +264,44 @@ extension Promise: _PromiseCombineInterface {
         
         return promise
     }
+    
+    @inlinable public static func combineAll_faster<T: Collection>(_ promises: T) -> Promise<some Sequence<Output>, Failure>
+        where T.Element == Promise<Output, Failure>
+    {
+        let promise = Promise<_ArrayLike<Output>, Failure>()
+
+        if promises.isEmpty {
+            promise.resolve(_ArrayLike(storage: .init(.allocate(capacity: 0))))
+            return promise
+        }
+        
+        var lock = Lock()
+        var waiting = promises.count
+        let outputs = UnsafeMutableBufferPointer<Output>.allocate(capacity: waiting)
+        var hasRejected = false
+        
+        for (i, child) in promises.enumerated() {
+            child.subscribe({ output in
+                lock.lock()
+                if hasRejected { return lock.unlock() }
+                outputs[i] = output
+                waiting -= 1
+                if waiting == 0 {
+                    promise.resolve(_ArrayLike(storage: .init(outputs)))
+                }
+                lock.unlock()
+            }, { failure in
+                lock.lock()
+                if hasRejected { return lock.unlock() }
+                hasRejected = true
+                promise.reject(failure)
+                lock.unlock()
+            })
+        }
+        
+        return promise
+    }
+
 }
 
 @usableFromInline final class _ArrayLike<Element>: CustomStringConvertible, Sequence {

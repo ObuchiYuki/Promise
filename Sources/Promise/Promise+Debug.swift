@@ -15,12 +15,12 @@
 extension Promise {
     @inlinable @_transparent
     public func assertNoFailure(_ prefix: String = "", file: StaticString = #file, line: UInt = #line) -> Promise<Output, Never> {
-        Promise<Output, Never>{ resolve, _ in
-            self.subscribe(resolve, { error in
-                let prefix = prefix.isEmpty ? "" : prefix + ": "
-                fatalError("\(prefix)\(error)", file: file, line: line)
-            })
-        }
+        let promise = Promise<Output, Never>()
+        self.subscribe(promise.resolve, { error in
+           let prefix = prefix.isEmpty ? "" : prefix + ": "
+           fatalError("\(prefix)\(error)", file: file, line: line)
+        })
+        return promise
     }
     
     @inlinable @_transparent
