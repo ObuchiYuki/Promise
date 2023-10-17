@@ -9,19 +9,19 @@
 import Foundation
 
 extension URLSession {
-    public func data(for url: URL) -> Promise<Data, Error> {
+    @inlinable public func data(for url: URL) -> Promise<Data, Error> {
         self.fetch(url).map{ $0.1 }
     }
     
-    public func data(for request: URLRequest) -> Promise<Data, Error> {
+    @inlinable public func data(for request: URLRequest) -> Promise<Data, Error> {
         self.fetch(request).map{ $0.1 }
     }
     
-    public func fetch(_ url: URL) -> Promise<(URLResponse, Data), Error> {
+    @inlinable public func fetch(_ url: URL) -> Promise<(URLResponse, Data), Error> {
         self.fetch(URLRequest(url: url))
     }
     
-    public func fetch(_ request: URLRequest) -> Promise<(URLResponse, Data), Error> {
+    @inlinable public func fetch(_ request: URLRequest) -> Promise<(URLResponse, Data), Error> {
         let promise = Promise<(URLResponse, Data), Error>()
         
         self.dataTask(with: request) { data, responce, error in
@@ -40,7 +40,7 @@ extension URLSession {
 }
 
 extension Data {
-    public static func async(contentsOf url: URL) -> Promise<Data, Error> {
+    @inlinable public static func async(contentsOf url: URL) -> Promise<Data, Error> {
         URLSession.shared.data(for: url)
     }
 }

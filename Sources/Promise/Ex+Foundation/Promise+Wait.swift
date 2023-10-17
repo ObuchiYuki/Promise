@@ -7,6 +7,14 @@
 
 #if canImport(Foundation)
 import Foundation
+
+@available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
+extension Duration {
+    @inlinable var timeInterval: TimeInterval {
+        let (seconds, attoseconds) = self.components
+        return Double(seconds) + Double(attoseconds) * 1e-18
+    }
+}
  
 extension Promise {
     @inlinable @_transparent
@@ -17,8 +25,7 @@ extension Promise {
     @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
     @inlinable @_transparent
     public func wait(on queue: DispatchQueue = .main, for duration: Duration) -> Promise<Output, Failure> {
-        let (seconds, attoseconds) = duration.components
-        return self.wait(on: queue, for: Double(seconds) + Double(attoseconds) * 1e-18)
+        return self.wait(on: queue, for: duration.timeInterval)
     }
     
     @inlinable @_transparent

@@ -9,12 +9,12 @@
 import Foundation
 
 extension Promise {
-    public func measureInterval(_ prefix: String = "") -> Promise<Output, Failure> {
+    @inlinable public func measureInterval(_ prefix: String = "") -> Promise<Output, Failure> {
         var target = PrintTarget()
         return self.measureInterval(prefix, to: &target)
     }
         
-    public func measureInterval<Target: TextOutputStream>(_ prefix: String = "", to target: inout Target) -> Promise<Output, Failure> {
+    @inlinable public func measureInterval<Target: TextOutputStream>(_ prefix: String = "", to target: inout Target) -> Promise<Output, Failure> {
         var target = target
         let prefix = prefix.isEmpty ? "" : "\(prefix): "
         let startDate = Date()
@@ -30,7 +30,7 @@ extension Promise {
         return self
     }
     
-    public func measureInterval(@_implicitSelfCapture _ receiveOutput: @escaping (TimeInterval) -> (), @_implicitSelfCapture _ receiveFailure: @escaping (TimeInterval) -> ()) -> Promise<Output, Failure> {
+    @inlinable public func measureInterval(@_implicitSelfCapture _ receiveOutput: @escaping (TimeInterval) -> (), @_implicitSelfCapture _ receiveFailure: @escaping (TimeInterval) -> ()) -> Promise<Output, Failure> {
         let startDate = Date()
         
         self.subscribe({ _ in
@@ -42,7 +42,7 @@ extension Promise {
         return self
     }
     
-    public func measureInterval(@_implicitSelfCapture _ receiveOutput: @escaping (TimeInterval) -> ()) -> Promise<Output, Failure> where Failure == Never {
+    @inlinable public func measureInterval(@_implicitSelfCapture _ receiveOutput: @escaping (TimeInterval) -> ()) -> Promise<Output, Failure> where Failure == Never {
         let startDate = Date()
         
         self.subscribe({ _ in
