@@ -18,6 +18,7 @@ import Glibc // for Linux
     @usableFromInline static let attr: UnsafePointer<pthread_mutexattr_t> = {
         let attr = UnsafeMutablePointer<pthread_mutexattr_t>.allocate(capacity: 1)
         _HANDLE_PTHREAD_CALL(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
+        _HANDLE_PTHREAD_CALL(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_ERRORCHECK), "pthread_mutexattr_settype")
         return UnsafePointer(attr)
     }()
     #endif
@@ -49,6 +50,9 @@ import Glibc // for Linux
         let attr = UnsafeMutablePointer<pthread_mutexattr_t>.allocate(capacity: 1)
         _HANDLE_PTHREAD_CALL(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
         _HANDLE_PTHREAD_CALL(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_RECURSIVE), "pthread_mutexattr_settype")
+        #if DEBUG
+        _HANDLE_PTHREAD_CALL(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_ERRORCHECK), "pthread_mutexattr_settype")
+        #endif
         return UnsafePointer(attr)
     }()
     
@@ -70,6 +74,7 @@ import Glibc // for Linux
     }
 }
 
+/// The call is converted to a macro (`@_transparent`).
 @inlinable @inline(__always) @_transparent
 func _HANDLE_PTHREAD_CALL(_ res: Int32, _ funcname: @autoclosure () -> StaticString) {
     #if DEBUG
