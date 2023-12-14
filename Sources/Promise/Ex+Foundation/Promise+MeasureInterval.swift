@@ -51,7 +51,6 @@ extension Promise {
         
         return self
     }
-
 }
 #endif
 

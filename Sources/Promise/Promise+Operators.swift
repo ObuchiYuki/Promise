@@ -232,6 +232,11 @@ extension Promise {
     }
     
     @inlinable @_transparent
+    public func resolve(_ output: () -> Output) where Failure == Never {
+        self.resolve(output())
+    }
+    
+    @inlinable @_transparent
     public func resolve(_ output: () throws -> Output) where Failure == Error {
         do {
             self.resolve(try output())
