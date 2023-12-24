@@ -3,6 +3,7 @@ import Promise
 
 final class PromiseMultithreadTests: XCTestCase {
     func testPromiseThreadMove_withAsync() {
+        usleep(1000000)
         let end = expectation(description: "")
         
         XCTAssert(Thread.isMainThread)

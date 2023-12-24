@@ -10,18 +10,6 @@ import Promise
 
 struct PromiseTestError: Error {}
 
-final class PromiseSpeedTests: XCTestCase {
-    func testSpeedCheck() {
-        let N = Int(1e7)
-        print(N)
-        let start = Date()
-        for _ in 0..<N {
-            Promise<Int, Never>().resolve(1)
-        }
-        print(Date().timeIntervalSince(start))
-    }
-}
-
 final class PromiseOperatorTests: XCTestCase {
     
     func testPromise_CallbackInit() throws {
@@ -58,6 +46,7 @@ final class PromiseOperatorTests: XCTestCase {
     }
     
     func testPromise_Chain() throws {
+        usleep(1000000)
         Promise<Int, PromiseTestError>.resolve(1)
             .flatMap{ .resolve($0 + 1) }
             .peek{ XCTAssertEqual($0, 2) }

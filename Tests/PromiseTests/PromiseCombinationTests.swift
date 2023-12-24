@@ -1,8 +1,9 @@
 import XCTest
 import Promise
 
-final class PromiseCombinationTest: XCTestCase {
+final class PromiseCombinationTests: XCTestCase {
     func testCombine_resultToBeTuple() {
+        usleep(1000000)
         Promise<(Int, Int), Never>.combine(
             Promise.resolve(1),
             Promise.resolve(2)
@@ -36,20 +37,7 @@ final class PromiseCombinationTest: XCTestCase {
             .waitUntilExit(self)
     }
     
-    
-    func testCombine_SpeedCheck_NormalCombineAll() {
-        let promises = (0..<100_000).map{ _ in Promise<Int, Never>.resolve(1) }
-        
-        measure {
-            Promise<Int, Never>.combineAll(promises).sink{_ in }
-        }
-    }
-    
-    func testCombine_SpeedCheck_FastCombineAll() {
-        let promises = (0..<100_000).map{ _ in Promise<Int, Never>.resolve(1) }
-        
-        measure {
-            Promise<Int, Never>.combineAll_fast(promises).sink{_ in }
-        }
+    func testFail() {
+        XCTFail()
     }
 }
