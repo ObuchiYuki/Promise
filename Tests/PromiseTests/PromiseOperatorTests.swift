@@ -46,7 +46,6 @@ final class PromiseOperatorTests: XCTestCase {
     }
     
     func testPromise_Chain() throws {
-        usleep(1000000)
         Promise<Int, PromiseTestError>.resolve(1)
             .flatMap{ .resolve($0 + 1) }
             .peek{ XCTAssertEqual($0, 2) }

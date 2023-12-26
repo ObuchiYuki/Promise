@@ -21,7 +21,6 @@ final class PromiseConcurrencyTests: XCTestCase {
     }
 
     func testNestedPromiseWithAsyncContextWithError() async throws {
-        usleep(1000000)
         var throwed = false
         do {
             try await Promise{

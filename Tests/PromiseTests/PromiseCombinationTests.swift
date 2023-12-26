@@ -3,7 +3,6 @@ import Promise
 
 final class PromiseCombinationTests: XCTestCase {
     func testCombine_resultToBeTuple() {
-        usleep(1000000)
         Promise<(Int, Int), Never>.combine(
             Promise.resolve(1),
             Promise.resolve(2)
@@ -35,9 +34,5 @@ final class PromiseCombinationTests: XCTestCase {
                 XCTAssertEqual($0.3, 4)
             }
             .waitUntilExit(self)
-    }
-    
-    func testFail() {
-        XCTFail()
     }
 }
