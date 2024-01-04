@@ -14,7 +14,9 @@ extension Promise {
         self.subscribe(promise.resolve, promise.reject)
             
         queue.asyncAfter(deadline: .now() + interval) {
-            promise.reject(error())
+            if !promise.isSettled {
+                promise.reject(error())
+            }
         }
         
         return promise
