@@ -210,6 +210,7 @@ extension Promise: _PromiseCombineInterface {
         return promise
     }
     
+    @available(iOS 13.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     @inlinable public static func combineAll_fast<T: Collection>(_ promises: T) -> Promise<some Sequence<Output>, Failure>
         where T.Element == Promise<Output, Failure>
     {
@@ -261,6 +262,7 @@ extension Promise: _PromiseCombineInterface {
         return promise
     }
     
+    @available(iOS 13.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     @inlinable public static func combineAll_faster<T: Collection>(_ promises: T) -> Promise<some Sequence<Output>, Failure>
         where T.Element == Promise<Output, Failure>
     {
@@ -300,6 +302,7 @@ extension Promise: _PromiseCombineInterface {
 
 }
 
+@available(iOS 13.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 @usableFromInline final class _ArrayLike<Element>: CustomStringConvertible, Sequence {
     @usableFromInline let storage: UnsafeBufferPointer<Element>
     
