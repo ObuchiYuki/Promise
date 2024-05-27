@@ -54,6 +54,16 @@ public final class PromiseRejector<Output> {
 }
 
 extension Promise where Failure == Error {
+    @inlinable public static func optionallyResolving() -> (promise: Promise<Output, Failure>, resolver: PromiseResolver<Output>, rejector: PromiseRejector<Output>) {
+        let promise = Promise<Output, Failure>()
+        
+        let observer = PromiseObserver(promise: promise)
+        let resolver = PromiseResolver(promise: promise, observer: observer)
+        let rejector = PromiseRejector(promise: promise, observer: observer)
+        
+        return (promise, resolver, rejector)
+    }
+    
     @inlinable public static func optionallyResolving(@_implicitSelfCapture _ handler: (PromiseResolver<Output>, PromiseRejector<Output>) -> ()) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
         
