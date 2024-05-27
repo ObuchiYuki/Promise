@@ -15,12 +15,10 @@ final class PromiseDeinitTests: XCTestCase {
             let promise = Promise<Void, Error>
                 .optionallyResolving { resolve, reject in }
             
-            promise.catch {_ in
-                failed = true
-            }
+            promise.catch {_ in failed = true }
         }
         
-        XCTAssert(failed)
+        XCTAssertTrue(failed)
     }
     
     func testDeinit_withResolve() {
@@ -31,11 +29,55 @@ final class PromiseDeinitTests: XCTestCase {
                     resolve(())
                 }
             
-            promise.catch {_ in
-                failed = true
-            }
+            promise.catch {_ in failed = true }
         }
         
         XCTAssertFalse(failed)
+    }
+    
+    func testDeinit_stillAlive() {
+        var failed = false
+        var resolver: PromiseResolver<Void>?
+        
+        do {
+            let promise = Promise<Void, Error>
+                .optionallyResolving { resolve, reject in
+                    resolver = resolve
+                }
+            
+            promise.catch {_ in failed = true }
+        }
+        
+        XCTAssertNotNil(resolver)
+        XCTAssertFalse(failed)
+    }
+    
+    func testDeinit_allDead() {
+        var failed = false
+        var resolver: PromiseResolver<Void>?
+        var rejector: PromiseRejector<Void>?
+        
+        do {
+            let promise = Promise<Void, Error>
+                .optionallyResolving { resolve, reject in
+                    resolver = resolve
+                    rejector = reject
+                }
+            
+            promise.catch {_ in failed = true }
+        }
+        
+        XCTAssertNotNil(resolver)
+        XCTAssertNotNil(rejector)
+        
+        XCTAssertFalse(failed)
+        
+        resolver = nil
+        
+        XCTAssertFalse(failed)
+        
+        rejector = nil
+        
+        XCTAssertTrue(failed)
     }
 }
