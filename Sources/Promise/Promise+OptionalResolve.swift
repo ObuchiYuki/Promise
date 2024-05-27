@@ -5,9 +5,8 @@
 //  Created by yuki on 2024/05/27.
 //
 
-@usableFromInline
-struct PromiseUnresolveError: Error, CustomStringConvertible {
-    @usableFromInline var description: String { "Promise has not been resolved." }
+public struct PromiseUnresolveError: Error, CustomStringConvertible {
+    @inlinable public var description: String { "Promise has not been resolved." }
     
     @inlinable init() {}
 }
@@ -53,8 +52,19 @@ public final class PromiseRejector<Output> {
     }
 }
 
+extension Promise {
+    @inlinable @_transparent
+    public func catchUnresolveError(_ replacingError: Failure) -> Promise<Output, Failure> {
+        self.mapError {
+            guard let error = $0 as? PromiseUnresolveError else { return $0 }
+            return replacingError
+        }
+    }
+}
+
 extension Promise where Failure == Error {
-    @inlinable public static func optionallyResolving() -> (promise: Promise<Output, Failure>, resolver: PromiseResolver<Output>, rejector: PromiseRejector<Output>) {
+    @inlinable @_transparent
+    public static func optionallyResolving() -> (promise: Promise<Output, Failure>, resolver: PromiseResolver<Output>, rejector: PromiseRejector<Output>) {
         let promise = Promise<Output, Failure>()
         
         let observer = PromiseObserver(promise: promise)
@@ -64,7 +74,8 @@ extension Promise where Failure == Error {
         return (promise, resolver, rejector)
     }
     
-    @inlinable public static func optionallyResolving(@_implicitSelfCapture _ handler: (PromiseResolver<Output>, PromiseRejector<Output>) -> ()) -> Promise<Output, Failure> {
+    @inlinable @_transparent
+    public static func optionallyResolving(@_implicitSelfCapture _ handler: (PromiseResolver<Output>, PromiseRejector<Output>) -> ()) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
         
         let observer = PromiseObserver(promise: promise)
