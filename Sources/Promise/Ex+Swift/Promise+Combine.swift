@@ -12,7 +12,7 @@ import Combine
 extension Promise {
     @inlinable @_transparent
     public func publisher() -> some Publisher<Output, Failure> {
-        Future{ handler in
+        Future { handler in
             self.subscribe({ handler(.success($0)) }, { handler(.failure($0)) })
         }
     }
@@ -25,7 +25,8 @@ extension Publisher {
         let promise = Promise<Output?, Failure>()
 
         var cancellable: AnyCancellable?
-        cancellable = self.sink{ completion in
+        
+        cancellable = self.sink { completion in
             switch completion {
             case .finished: promise.resolve(nil)
             case .failure(let error): promise.reject(error)
