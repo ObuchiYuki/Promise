@@ -116,7 +116,31 @@ extension Promise {
         self.subscribe({ promise.resolve(.success($0)) }, { promise.resolve(.failure($0)) })
         return promise
     }
-
+    
+    @inlinable @_transparent
+    public func unpackResult<O>() -> Promise<O, Failure> where Output == Result<O, Failure> {
+        let promise = Promise<O, Failure>()
+        self.subscribe({
+            switch $0 {
+            case .success(let output): promise.resolve(output)
+            case .failure(let failure): promise.reject(failure)
+            }
+        }, promise.reject)
+        return promise
+    }
+    
+    @inlinable @_transparent
+    public func unpackResult<O, F>() -> Promise<O, F> where Output == Result<O, F>, Failure == Never {
+        let promise = Promise<O, F>()
+        self.subscribe({
+            switch $0 {
+            case .success(let output): promise.resolve(output)
+            case .failure(let failure): promise.reject(failure)
+            }
+        }, {_ in})
+        return promise
+    }
+    
     @inlinable @_transparent
     public func receive(@_implicitSelfCapture on callback: @escaping (@escaping () -> ()) -> ()) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
@@ -169,7 +193,6 @@ extension Promise {
         return promise
     }
     
-    @discardableResult
     @inlinable @_transparent
     public func tryCatch(@_implicitSelfCapture _ receiveFailure: @escaping (Failure) throws -> ()) -> Promise<Void, Error> {
         let promise = Promise<Void, Error>()
@@ -204,7 +227,6 @@ extension Promise {
         return self
     }
     
-    @discardableResult
     @inlinable @_transparent
     public func tryFinally(@_implicitSelfCapture _ receive: @escaping () throws -> ()) -> Promise<Output, Error> {
         let promise = Promise<Output, Error>()

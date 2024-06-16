@@ -76,7 +76,7 @@ extension Task {
     @inlinable @_transparent
     public var promise: Promise<Success, Failure> {
         let promise = Promise<Success, Failure>()
-        let task = Task<Void, Never>{
+        let task = Task<Void, Never> {
             switch await self.result {
             case .success(let value): promise.resolve(value)
             case .failure(let error): promise.reject(error)

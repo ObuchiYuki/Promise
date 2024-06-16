@@ -30,7 +30,9 @@ extension URLSession {
             } else if let data = data, let responce = responce {
                 promise.resolve((responce, data))
             } else {
-                promise.reject(NSError(domain: "No data or responce", code: 0, userInfo: nil))
+                promise.reject(NSError(domain: "Promise", code: 500, userInfo: [
+                    NSLocalizedDescriptionKey: "Data task received no data and no error."
+                ]))
             }
         }
         .resume()

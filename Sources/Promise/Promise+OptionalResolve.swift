@@ -11,6 +11,56 @@ public struct PromiseUnresolveError: Error, CustomStringConvertible {
     @inlinable init() {}
 }
 
+#if canImport(Foundation)
+import Foundation
+
+extension PromiseUnresolveError: LocalizedError {
+    @inlinable public var errorDescription: String? { self.description }
+}
+#endif
+
+extension Promise where Failure == Error {
+    @inlinable @_transparent
+    public static func optionallyResolving() -> (promise: Promise<Output, Failure>, resolver: PromiseResolver<Output>, rejector: PromiseRejector<Output>) {
+        let promise = Promise<Output, Failure>()
+        
+        let observer = PromiseObserver(promise: promise)
+        let resolver = PromiseResolver(promise: promise, observer: observer)
+        let rejector = PromiseRejector(promise: promise, observer: observer)
+        
+        return (promise, resolver, rejector)
+    }
+    
+    @inlinable @_transparent
+    public static func optionallyResolving(@_implicitSelfCapture _ handler: (PromiseResolver<Output>, PromiseRejector<Output>) -> ()) -> Promise<Output, Failure> {
+        let promise = Promise<Output, Failure>()
+        
+        let observer = PromiseObserver(promise: promise)
+        let resolver = PromiseResolver(promise: promise, observer: observer)
+        let rejector = PromiseRejector(promise: promise, observer: observer)
+        
+        handler(resolver, rejector)
+        
+        return promise
+    }
+    
+    @inlinable public static func optionallyResolving(@_implicitSelfCapture _ handler: (PromiseResolver<Output>, PromiseRejector<Output>) throws -> ()) -> Promise<Output, Failure> {
+        let promise = Promise<Output, Failure>()
+        
+        let observer = PromiseObserver(promise: promise)
+        let resolver = PromiseResolver(promise: promise, observer: observer)
+        let rejector = PromiseRejector(promise: promise, observer: observer)
+        
+        do {
+            try handler(resolver, rejector)
+        } catch {
+            promise.reject(error)
+        }
+        
+        return promise
+    }
+}
+
 @usableFromInline
 final class PromiseObserver<Output> {
     @usableFromInline let promise: Promise<Output, Error>
@@ -62,45 +112,5 @@ extension Promise {
     }
 }
 
-extension Promise where Failure == Error {
-    @inlinable @_transparent
-    public static func optionallyResolving() -> (promise: Promise<Output, Failure>, resolver: PromiseResolver<Output>, rejector: PromiseRejector<Output>) {
-        let promise = Promise<Output, Failure>()
-        
-        let observer = PromiseObserver(promise: promise)
-        let resolver = PromiseResolver(promise: promise, observer: observer)
-        let rejector = PromiseRejector(promise: promise, observer: observer)
-        
-        return (promise, resolver, rejector)
-    }
-    
-    @inlinable @_transparent
-    public static func optionallyResolving(@_implicitSelfCapture _ handler: (PromiseResolver<Output>, PromiseRejector<Output>) -> ()) -> Promise<Output, Failure> {
-        let promise = Promise<Output, Failure>()
-        
-        let observer = PromiseObserver(promise: promise)
-        let resolver = PromiseResolver(promise: promise, observer: observer)
-        let rejector = PromiseRejector(promise: promise, observer: observer)
-        
-        handler(resolver, rejector)
-        
-        return promise
-    }
-    
-    @inlinable public static func optionallyResolving(@_implicitSelfCapture _ handler: (PromiseResolver<Output>, PromiseRejector<Output>) throws -> ()) -> Promise<Output, Failure> {
-        let promise = Promise<Output, Failure>()
-        
-        let observer = PromiseObserver(promise: promise)
-        let resolver = PromiseResolver(promise: promise, observer: observer)
-        let rejector = PromiseRejector(promise: promise, observer: observer)
-        
-        do {
-            try handler(resolver, rejector)
-        } catch {
-            promise.reject(error)
-        }
-        
-        return promise
-    }
-}
+
 
