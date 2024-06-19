@@ -25,7 +25,7 @@ import Glibc // for Linux
 
     @usableFromInline var mutex = pthread_mutex_t()
     
-    @inlinable @inline(__always) 
+    @inlinable @_transparent @inline(__always)
     init() {
         #if DEBUG
         _HANDLE_PTHREAD_CALL(pthread_mutex_init(&mutex, Lock.attr), "pthread_mutex_init")
@@ -34,12 +34,12 @@ import Glibc // for Linux
         #endif
     }
     
-    @inlinable @inline(__always)
+    @inlinable @_transparent @inline(__always)
     mutating func lock() {
         _HANDLE_PTHREAD_CALL(pthread_mutex_lock(&mutex), "pthread_mutex_lock")
     }
     
-    @inlinable @inline(__always)
+    @inlinable @_transparent @inline(__always)
     mutating func unlock() {
         _HANDLE_PTHREAD_CALL(pthread_mutex_unlock(&mutex), "pthread_mutex_unlock")
     }
@@ -55,17 +55,17 @@ import Glibc // for Linux
     
     @usableFromInline var mutex = pthread_mutex_t()
     
-    @inlinable @inline(__always)
+    @inlinable @_transparent @inline(__always)
     init() {
         _HANDLE_PTHREAD_CALL(pthread_mutex_init(&mutex, RecursiveLock.attr), "pthread_mutex_init")
     }
     
-    @inlinable @inline(__always)
+    @inlinable @_transparent @inline(__always)
     mutating func lock() {
         _HANDLE_PTHREAD_CALL(pthread_mutex_lock(&mutex), "pthread_mutex_lock")
     }
     
-    @inlinable @inline(__always)
+    @inlinable @_transparent @inline(__always)
     mutating func unlock() {
         _HANDLE_PTHREAD_CALL(pthread_mutex_unlock(&mutex), "pthread_mutex_unlock")
     }
