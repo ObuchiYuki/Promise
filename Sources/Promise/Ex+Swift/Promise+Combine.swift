@@ -10,7 +10,7 @@ import Combine
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension Promise {
-    @inlinable @_transparent
+    @inlinable
     public func publisher() -> some Publisher<Output, Failure> {
         Future { handler in
             self.subscribe({ handler(.success($0)) }, { handler(.failure($0)) })
@@ -20,7 +20,7 @@ extension Promise {
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension Publisher {
-    @inlinable @_transparent
+    @inlinable
     public func firstValue() -> Promise<Output?, Failure> {
         let promise = Promise<Output?, Failure>()
 

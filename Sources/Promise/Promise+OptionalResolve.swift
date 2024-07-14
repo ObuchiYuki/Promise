@@ -20,7 +20,7 @@ extension PromiseUnresolveError: LocalizedError {
 #endif
 
 extension Promise where Failure == Error {
-    @inlinable @_transparent
+    @inlinable
     public static func optionallyResolving() -> (promise: Promise<Output, Failure>, resolver: PromiseResolver<Output>, rejector: PromiseRejector<Output>) {
         let promise = Promise<Output, Failure>()
         
@@ -31,7 +31,7 @@ extension Promise where Failure == Error {
         return (promise, resolver, rejector)
     }
     
-    @inlinable @_transparent
+    @inlinable
     public static func optionallyResolving(@_implicitSelfCapture _ handler: (PromiseResolver<Output>, PromiseRejector<Output>) -> ()) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
         
@@ -103,7 +103,7 @@ public final class PromiseRejector<Output> {
 }
 
 extension Promise {
-    @inlinable @_transparent
+    @inlinable
     public func catchUnresolveError(_ replacingError: Failure) -> Promise<Output, Failure> {
         self.mapError {
             guard let error = $0 as? PromiseUnresolveError else { return $0 }

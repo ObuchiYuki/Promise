@@ -25,7 +25,7 @@ import Glibc // for Linux
 
     @usableFromInline var mutex = pthread_mutex_t()
     
-    @inlinable @_transparent @inline(__always)
+    @inlinable @inline(__always)
     init() {
         #if DEBUG
         _HANDLE_PTHREAD_CALL(pthread_mutex_init(&mutex, Lock.attr), "pthread_mutex_init")
@@ -34,12 +34,12 @@ import Glibc // for Linux
         #endif
     }
     
-    @inlinable @_transparent @inline(__always)
+    @inlinable @inline(__always)
     mutating func lock() {
         _HANDLE_PTHREAD_CALL(pthread_mutex_lock(&mutex), "pthread_mutex_lock")
     }
     
-    @inlinable @_transparent @inline(__always)
+    @inlinable @inline(__always)
     mutating func unlock() {
         _HANDLE_PTHREAD_CALL(pthread_mutex_unlock(&mutex), "pthread_mutex_unlock")
     }
@@ -55,24 +55,24 @@ import Glibc // for Linux
     
     @usableFromInline var mutex = pthread_mutex_t()
     
-    @inlinable @_transparent @inline(__always)
+    @inlinable @inline(__always)
     init() {
         _HANDLE_PTHREAD_CALL(pthread_mutex_init(&mutex, RecursiveLock.attr), "pthread_mutex_init")
     }
     
-    @inlinable @_transparent @inline(__always)
+    @inlinable @inline(__always)
     mutating func lock() {
         _HANDLE_PTHREAD_CALL(pthread_mutex_lock(&mutex), "pthread_mutex_lock")
     }
     
-    @inlinable @_transparent @inline(__always)
+    @inlinable @inline(__always)
     mutating func unlock() {
         _HANDLE_PTHREAD_CALL(pthread_mutex_unlock(&mutex), "pthread_mutex_unlock")
     }
 }
 
 /// The call is converted to a macro (`@_transparent`).
-@inlinable @inline(__always) @_transparent
+@inlinable @inline(__always)
 func _HANDLE_PTHREAD_CALL(_ res: Int32, _ funcname: @autoclosure () -> StaticString) {
     #if DEBUG
     if res != 0 {

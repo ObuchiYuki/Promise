@@ -32,7 +32,7 @@ public final class Promise<Output, Failure: Error> {
 }
 
 extension Promise {
-    @inlinable @_transparent
+    @inlinable
     public func resolve(_ output: Output) {
         self._lock.lock()
         defer { self._lock.unlock() }
@@ -44,7 +44,7 @@ extension Promise {
         self._subscribers.removeAll()
     }
     
-    @inlinable @_transparent
+    @inlinable
     public func reject(_ failure: Failure) {
         self._lock.lock()
         defer { self._lock.unlock() }
@@ -56,7 +56,7 @@ extension Promise {
         self._subscribers.removeAll()
     }
 
-    @inlinable @_transparent
+    @inlinable
     func subscribe(_ resolve: @escaping (Output) -> (), _ reject: @escaping (Failure) -> ()) {
         self._lock.lock()
         defer { self._lock.unlock() }

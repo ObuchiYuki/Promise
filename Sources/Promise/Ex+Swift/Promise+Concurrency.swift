@@ -10,7 +10,7 @@ extension Promise: @unchecked Sendable {}
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension Promise where Failure == Never {
     @inlinable public var value: Output {
-        @inlinable @_transparent get async {
+        @inlinable get async {
             #if DEBUG
             await withCheckedContinuation{ continuation in
                 self.subscribe(continuation.resume(returning:), continuation.resume(throwing:))
@@ -23,14 +23,14 @@ extension Promise where Failure == Never {
         }
     }
 
-    @inlinable @_transparent
+    @inlinable
     public convenience init(priority: TaskPriority? = nil, @_implicitSelfCapture _ task: @escaping () async -> Output) {
         self.init()
         let task = Task(priority: priority) { self.resolve(await task()) }
         self.subscribe({_ in task.cancel() }, {_ in })
     }
     
-    @inlinable @_transparent
+    @inlinable
     public static func detached(priority: TaskPriority? = nil, @_implicitSelfCapture _ task: @escaping () async -> Output) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
         let task = Task.detached(priority: priority) { promise.resolve(await task()) }
@@ -42,7 +42,7 @@ extension Promise where Failure == Never {
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension Promise {
     @inlinable public var value: Output {
-        @inlinable @_transparent get async throws {
+        @inlinable get async throws {
             #if DEBUG
             try await withCheckedThrowingContinuation{ continuation in
                 self.sink(continuation.resume(returning:), continuation.resume(throwing:))
@@ -55,14 +55,14 @@ extension Promise {
         }
     }
     
-    @inlinable @_transparent
+    @inlinable
     public convenience init(priority: TaskPriority? = nil, @_implicitSelfCapture _ task: @escaping () async throws -> Output) where Failure == Error {
         self.init()
         let task = Task(priority: priority) { do { self.resolve(try await task()) } catch { self.reject(error) } }
         self.subscribe({_ in task.cancel() }, {_ in task.cancel() })
     }
     
-    @inlinable @_transparent
+    @inlinable
     public static func detached(priority: TaskPriority? = nil, @_implicitSelfCapture _ task: @escaping () async throws -> Output) -> Promise<Output, Failure> where Failure == Error {
         let promise = Promise<Output, Failure>()
         let task = Task.detached(priority: priority) { do { promise.resolve(try await task()) } catch { promise.reject(error) } }
@@ -73,7 +73,7 @@ extension Promise {
 
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension Task {
-    @inlinable @_transparent
+    @inlinable
     public var promise: Promise<Success, Failure> {
         let promise = Promise<Success, Failure>()
         let task = Task<Void, Never> {
@@ -89,7 +89,7 @@ extension Task {
 
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension Promise {
-    @inlinable @_transparent
+    @inlinable
     public func receiveOnMainActor() -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
          

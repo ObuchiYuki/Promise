@@ -13,7 +13,7 @@
 }
 
 extension Promise {
-    @inlinable @_transparent
+    @inlinable
     public func assertNoFailure(_ prefix: String = "", file: StaticString = #file, line: UInt = #line) -> Promise<Output, Never> {
         let promise = Promise<Output, Never>()
         self.subscribe(promise.resolve, { error in
@@ -23,13 +23,13 @@ extension Promise {
         return promise
     }
     
-    @inlinable @_transparent
+    @inlinable
     public func print(_ prefix: String = "") -> Promise<Output, Failure> {
         var target = PrintTarget()
         return self.print(prefix, to: &target)
     }
     
-    @inlinable @_transparent
+    @inlinable
     public func print<Target: TextOutputStream>(_ prefix: String = "", to target: inout Target) -> Promise<Output, Failure> {
         var target = target
         let prefix = prefix.isEmpty ? "" : "\(prefix): "
@@ -48,7 +48,7 @@ extension Promise {
 import Darwin
 
 extension Promise {
-    @inlinable @_transparent
+    @inlinable
     public func breakpoint(@_implicitSelfCapture _ receiveOutput: ((Output) -> Bool)? = nil, @_implicitSelfCapture _ receiveFailure: ((Failure) -> Bool)? = nil) -> Promise<Output, Failure> {
         self.subscribe({ output in
             if receiveOutput?(output) == true { raise(SIGTRAP) }
@@ -58,13 +58,13 @@ extension Promise {
         return self
     }
 
-    @inlinable @_transparent
+    @inlinable
     public func breakpointOnError(_ prefix: String = "") -> Promise<Output, Failure> {
         var target = PrintTarget()
         return self.breakpointOnError(prefix, to: &target)
     }
     
-    @inlinable @_transparent
+    @inlinable
     public func breakpointOnError<Target: TextOutputStream>(_ prefix: String = "", to target: inout Target) -> Promise<Output, Failure> {
         var target = target
         let prefix = prefix.isEmpty ? "" : "\(prefix): "
