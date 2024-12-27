@@ -192,6 +192,16 @@ extension Promise {
         self.subscribe({_ in promise.resolve(()) }, { receiveFailure($0); promise.resolve(()) })
         return promise
     }
+
+    @inlinable
+    public func `catch`<ErrorType: Error>(_ errorType: ErrorType.Type, @_implicitSelfCapture _ receiveFailure: @escaping (ErrorType) -> ()) -> Promise<Output, Failure> {
+        let promise = Promise<Output, Failure>()
+        self.subscribe(promise.resolve, { failure in
+            if let error = failure as? ErrorType { receiveFailure(error) }
+            promise.reject(failure)
+        })
+        return promise
+    }
     
     @inlinable
     public func tryCatch(@_implicitSelfCapture _ receiveFailure: @escaping (Failure) throws -> ()) -> Promise<Void, Error> {
@@ -200,14 +210,15 @@ extension Promise {
             do { try receiveFailure(failure); promise.resolve(()) } catch { promise.reject(error) }
         })
         return promise
-    
     }
-
+    
     @inlinable
-    public func `catch`<ErrorType: Error>(_ errorType: ErrorType.Type, @_implicitSelfCapture _ receiveFailure: @escaping (ErrorType) -> ()) -> Promise<Output, Failure> {
-        let promise = Promise<Output, Failure>()
+    public func tryCatch<ErrorType: Error>(_ errorType: ErrorType.Type, @_implicitSelfCapture _ receiveFailure: @escaping (ErrorType) throws -> ()) -> Promise<Output, Error> {
+        let promise = Promise<Output, Error>()
         self.subscribe(promise.resolve, { failure in
-            if let error = failure as? ErrorType { receiveFailure(error) }
+            if let error = failure as? ErrorType {
+                do { try receiveFailure(error) } catch { promise.reject(error) }
+            }
             promise.reject(failure)
         })
         return promise
