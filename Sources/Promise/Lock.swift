@@ -78,8 +78,7 @@ import Glibc // for Linux
     }
 }
 
-/// The call is converted to a macro (`@_transparent`).
-@inlinable @inline(__always) @_transparent
+@inlinable @_transparent
 func _HANDLE_PTHREAD_CALL(_ res: Int32, _ funcname: @autoclosure () -> StaticString) {
     if res != 0 {
         fatalError("\(funcname()) failed: \(String(validatingUTF8: strerror(res)) ?? "Unkown Error")")

@@ -5,6 +5,7 @@
 //  Created by yuki on 2022/01/27.
 //
 
+@available(*, deprecated, message: "Promise cancel feature has been deprecated. Use own error type instead.")
 public struct PromiseCancel: Error {
     public var userInfo = [String: Any?]()
     
@@ -16,9 +17,11 @@ public struct PromiseCancel: Error {
 #if canImport(Foundation)
 import Foundation
 
+@available(*, deprecated, message: "Promise cancel feature has been deprecated. Use own error type instead.")
 extension PromiseCancel: LocalizedError {}
 #endif
 
+@available(*, deprecated, message: "Promise cancel feature has been deprecated. Use own error type instead.")
 extension Promise {
     @inlinable public func cancel(_ cancel: PromiseCancel = PromiseCancel()) where Failure == Error {
         self.reject(cancel)

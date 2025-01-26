@@ -135,12 +135,12 @@ extension Promise: _PromiseCombineInterface {
     @inlinable public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
         if promises.isEmpty { return .resolve([]) }
         
-        var lock = Lock()
+        let lock = Lock()
         let promise = Promise<[Output], Failure>()
         
         let count = promises.count
         var outputs = [Output?](repeating: nil, count: count)
-        var dp = [Bool](repeating: false, count: count)
+        var received = [Bool](repeating: false, count: count)
         var fulfilled = 0
         var hasCompleted = false
         
@@ -150,8 +150,8 @@ extension Promise: _PromiseCombineInterface {
                 defer { lock.unlock() }
                 
                 if hasCompleted { return }
-                if dp[i] == false {
-                    dp[i] = true
+                if received[i] == false {
+                    received[i] = true
                     fulfilled += 1
                 }
                 outputs[i] = output
@@ -175,7 +175,7 @@ extension Promise: _PromiseCombineInterface {
     @inlinable public static func combineAll(_ promises: [Promise<Void, Failure>]) -> Promise<Void, Failure> where Output == Void {
         if promises.isEmpty { return .resolve() }
         
-        var lock = Lock()
+        let lock = Lock()
         let promise = Promise<Void, Failure>()
         
         let count = promises.count
