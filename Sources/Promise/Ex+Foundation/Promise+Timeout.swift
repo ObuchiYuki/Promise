@@ -1,6 +1,6 @@
 //
 //  Promise+Timeout.swift
-//  
+//  Promise
 //
 //  Created by yuki on 2022/01/27.
 //

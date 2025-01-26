@@ -1,6 +1,6 @@
 //
 //  Promise+URLSession.swift
-//
+//  Promise
 //
 //  Created by yuki on 2021/08/07.
 //
@@ -44,6 +44,12 @@ extension URLSession {
 extension Data {
     @inlinable public static func async(contentsOf url: URL) -> Promise<Data, Error> {
         URLSession.shared.data(for: url)
+    }
+}
+
+extension String {
+    @inlinable public static func async(contentsOf url: URL, encoding: Encoding) -> Promise<String, Error> {
+        Promise.tryDispatch { try String(contentsOf: url, encoding: encoding) }
     }
 }
 

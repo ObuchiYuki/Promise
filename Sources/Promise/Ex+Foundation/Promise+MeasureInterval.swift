@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  Promise+MeasureInterval.swift
+//  Promise
 //
 //  Created by yuki on 2023/06/04.
 //

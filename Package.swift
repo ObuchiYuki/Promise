@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -6,10 +6,10 @@ import PackageDescription
 let package = Package(
     name: "Promise",
     platforms: [
-        .iOS(.v10),
+        .iOS(.v12),
         .macOS(.v10_15),
-        .tvOS(.v9),
-        .watchOS(.v3)
+        .tvOS(.v12),
+        .watchOS(.v4)
     ],
     products: [
         .library(name: "Promise", targets: ["Promise"])

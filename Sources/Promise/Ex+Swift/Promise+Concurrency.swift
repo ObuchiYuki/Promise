@@ -1,6 +1,6 @@
 //
-//  File.swift
-//
+//  Promise+Concurrency.swift
+//  Promise
 //
 //  Created by yuki on 2023/03/17.
 //
@@ -12,12 +12,14 @@ extension Promise where Failure == Never {
     @inlinable public var value: Output {
         @inlinable get async {
             #if DEBUG
-            await withCheckedContinuation{ continuation in
-                self.subscribe(continuation.resume(returning:), continuation.resume(throwing:))
+            await withCheckedContinuation { continuation in
+                let resumeReturning = unsafeBitCast(continuation.resume(returning:), to: ((Output) -> Void).self)
+                self.subscribe(resumeReturning, {_ in })
             }
             #else
-            await withUnsafeContinuation{ continuation in
-                self.subscribe(continuation.resume(returning:), continuation.resume(throwing:))
+            await withUnsafeContinuation { continuation in
+                let resumeReturning = unsafeBitCast(continuation.resume(returning:), to: ((Output) -> Void).self)
+                self.subscribe(resumeReturning, {_ in })
             }
             #endif
         }

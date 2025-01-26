@@ -1,6 +1,6 @@
 //
 //  Promise+Combine.swift
-//  
+//  Promise
 //
 //  Created by yuki on 2021/10/24.
 //

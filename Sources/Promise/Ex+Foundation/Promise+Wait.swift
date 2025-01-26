@@ -1,6 +1,6 @@
 //
 //  Promise+Wait.swift
-//
+//  Promise
 //
 //  Created by yuki on 2021/08/23.
 //

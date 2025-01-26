@@ -1,6 +1,6 @@
 //
-//  Promise+Async.swift
-//
+//  Promise+GCD.swift
+//  Promise
 //
 //  Created by yuki on 2021/08/07.
 //
