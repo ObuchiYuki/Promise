@@ -102,59 +102,38 @@ extension Promise {
     }
 }
 
-
-extension Array where Element: _PromiseCombineInterface {
-    @inlinable public func mergeAll() -> Promise<Element.Output, Element.Failure> {
-        Element.mergeAll(self)
-    }
-    
-    @inlinable public func combineAll() -> Promise<[Element.Output], Element.Failure> {
-        Element.combineAll(self)
-    }
-}
-
-public protocol _PromiseCombineInterface {
-    associatedtype Output
-    associatedtype Failure: Error
-    
-    static func combineAll(_ promises: [Self]) -> Promise<[Output], Failure>
-    static func mergeAll(_ promises: [Self]) -> Promise<Output, Failure>
-}
-
-extension Promise: _PromiseCombineInterface {
-    @inlinable public static func mergeAll(_ promises: [Promise<Output, Failure>]) -> Promise<Output, Failure> {
+extension Array {
+    @inlinable public func mergeAll<Output, Failure: Error>() -> Promise<Output, Failure> where Self.Element == Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
         
-        for sub in promises {
+        for sub in self {
             sub.subscribe(promise.resolve, promise.reject)
         }
         
         return promise
     }
     
-    @inlinable public static func combineAll(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
-        if promises.isEmpty { return .resolve([]) }
+    @inlinable public func combineAll<Output, Failure: Error>() -> Promise<[Output], Failure> where Self.Element == Promise<Output, Failure> {
+        if self.isEmpty { return .resolve([]) }
         
         let lock = Lock()
         let promise = Promise<[Output], Failure>()
         
-        let count = promises.count
+        let count = self.count
         var outputs = [Output?](repeating: nil, count: count)
-        var received = [Bool](repeating: false, count: count)
         var fulfilled = 0
         var hasCompleted = false
         
-        for (i, child) in promises.enumerated() {
+        for (i, child) in self.enumerated() {
             child.subscribe({ output in
                 lock.lock()
                 defer { lock.unlock() }
                 
                 if hasCompleted { return }
-                if received[i] == false {
-                    received[i] = true
-                    fulfilled += 1
-                }
+                
+                if outputs[i] == nil { fulfilled += 1 }
                 outputs[i] = output
+                
                 if fulfilled == count {
                     hasCompleted = true
                     promise.resolve(outputs as! [Output])
@@ -172,25 +151,25 @@ extension Promise: _PromiseCombineInterface {
         return promise
     }
 
-    @inlinable public static func combineAll(_ promises: [Promise<Void, Failure>]) -> Promise<Void, Failure> where Output == Void {
-        if promises.isEmpty { return .resolve() }
+    @inlinable public func combineAll<Failure: Error>() -> Promise<Void, Failure> where Self.Element == Promise<Void, Failure> {
+        if self.isEmpty { return .resolve() }
         
         let lock = Lock()
         let promise = Promise<Void, Failure>()
         
-        let count = promises.count
-        var dp = [Bool](repeating: false, count: count)
+        let count = self.count
+        var received = [Bool](repeating: false, count: count)
         var fulfilled = 0
         var hasCompleted = false
         
-        for (i, child) in promises.enumerated() {
+        for (i, child) in self.enumerated() {
             child.subscribe({ output in
                 lock.lock()
                 defer { lock.unlock() }
                 
                 if hasCompleted { return }
-                if dp[i] == false {
-                    dp[i] = true
+                if received[i] == false {
+                    received[i] = true
                     fulfilled += 1
                 }
                 if fulfilled == count {
@@ -209,109 +188,4 @@ extension Promise: _PromiseCombineInterface {
         
         return promise
     }
-    
-    @available(iOS 13.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-    @inlinable public static func combineAll_fast<T: Collection>(_ promises: T) -> Promise<some Sequence<Output>, Failure>
-        where T.Element == Promise<Output, Failure>
-    {
-        let promise = Promise<_ArrayLike<Output>, Failure>()
-
-        if promises.isEmpty {
-            promise.resolve(_ArrayLike(storage: .init(.allocate(capacity: 0))))
-            return promise
-        }
-        
-        var lock = Lock()
-        let count = promises.count
-        let outputs = UnsafeMutableBufferPointer<Output>.allocate(capacity: count)
-        let dp = UnsafeMutableBufferPointer<Bool>.allocate(capacity: count)
-        dp.initialize(repeating: false)
-        
-        var fulfilled = 0
-        var hasCompleted = false
-        
-        for (i, child) in promises.enumerated() {
-            child.subscribe({ output in
-                lock.lock()
-                
-                if hasCompleted { return lock.unlock() }
-                if dp[i] == false {
-                    dp[i] = true
-                    fulfilled += 1
-                }
-                outputs[i] = output
-                if fulfilled == count {
-                    hasCompleted = true
-                    promise.resolve(_ArrayLike(storage: .init(outputs)))
-                    dp.deallocate()
-                    lock.unlock()
-                } else {
-                    lock.unlock()
-                }
-            }, { failure in
-                lock.lock()
-                
-                if hasCompleted { return lock.unlock() }
-                hasCompleted = true
-                promise.reject(failure)
-                dp.deallocate()
-                lock.unlock()
-            })
-        }
-        
-        return promise
-    }
-    
-    @available(iOS 13.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-    @inlinable public static func combineAll_faster<T: Collection>(_ promises: T) -> Promise<some Sequence<Output>, Failure>
-        where T.Element == Promise<Output, Failure>
-    {
-        let promise = Promise<_ArrayLike<Output>, Failure>()
-
-        if promises.isEmpty {
-            promise.resolve(_ArrayLike(storage: .init(.allocate(capacity: 0))))
-            return promise
-        }
-        
-        var lock = Lock()
-        var waiting = promises.count
-        let outputs = UnsafeMutableBufferPointer<Output>.allocate(capacity: waiting)
-        var hasRejected = false
-        
-        for (i, child) in promises.enumerated() {
-            child.subscribe({ output in
-                lock.lock()
-                if hasRejected { return lock.unlock() }
-                outputs[i] = output
-                waiting -= 1
-                if waiting == 0 {
-                    promise.resolve(_ArrayLike(storage: .init(outputs)))
-                }
-                lock.unlock()
-            }, { failure in
-                lock.lock()
-                if hasRejected { return lock.unlock() }
-                hasRejected = true
-                promise.reject(failure)
-                lock.unlock()
-            })
-        }
-        
-        return promise
-    }
-
 }
-
-@available(iOS 13.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-@usableFromInline final class _ArrayLike<Element>: CustomStringConvertible, Sequence {
-    @usableFromInline let storage: UnsafeBufferPointer<Element>
-    
-    @inlinable init(storage: UnsafeBufferPointer<Element>) { self.storage = storage }
-    
-    @inlinable deinit { storage.deallocate() }
-    
-    @inlinable var description: String { storage.map{ $0 }.description }
-    
-    @inlinable func makeIterator() -> some IteratorProtocol<Element> { storage.makeIterator() }
-}
-

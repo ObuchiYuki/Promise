@@ -35,4 +35,64 @@ final class PromiseCombinationTests: XCTestCase {
             }
             .waitUntilExit(self)
     }
+    
+    func testCombine_arrayMergeAll() {
+        let promises = [
+            Promise<Int, Never>.resolve(1),
+            Promise<Int, Never>.resolve(2),
+            Promise<Int, Never>.resolve(3),
+            Promise<Int, Never>.resolve(4),
+        ]
+        
+        promises.mergeAll()
+            .peek { value in
+                XCTAssertEqual(value, 1)
+            }
+            .waitUntilExit(self)
+    }
+    
+    func testCombine_arrayMergeAll_fromMultithread() {
+        let promises = [
+            Promise<Int, Never>.dispatch { 1 },
+            Promise<Int, Never>.dispatch { 2 },
+            Promise<Int, Never>.dispatch { 3 },
+            Promise<Int, Never>.dispatch { 4 },
+        ]
+        
+        promises.mergeAll()
+            .peek { value in
+                XCTAssertTrue([1, 2, 3, 4].contains(value))
+            }
+            .waitUntilExit(self)
+    }
+    
+    func testCombine_arrayCombineAll() {
+        let promises = [
+            Promise<Int, Never>.resolve(1),
+            Promise<Int, Never>.resolve(2),
+            Promise<Int, Never>.resolve(3),
+            Promise<Int, Never>.resolve(4),
+        ]
+        
+        promises.combineAll()
+            .peek { value in
+                XCTAssertEqual(value, [1, 2, 3, 4])
+            }
+            .waitUntilExit(self)
+    }
+    
+    func testCombine_arrayCombineAll_fromMultithread() {
+        let promises = [
+            Promise<Int, Never>.dispatch { 1 },
+            Promise<Int, Never>.dispatch { 2 },
+            Promise<Int, Never>.dispatch { 3 },
+            Promise<Int, Never>.dispatch { 4 },
+        ]
+        
+        promises.combineAll()
+            .peek { value in
+                XCTAssertEqual(value, [1, 2, 3, 4])
+            }
+            .waitUntilExit(self)
+    }
 }
