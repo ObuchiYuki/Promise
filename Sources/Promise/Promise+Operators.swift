@@ -142,7 +142,7 @@ extension Promise {
     }
     
     @inlinable
-    public func receive(@_implicitSelfCapture on callback: @escaping (@escaping () -> ()) -> ()) -> Promise<Output, Failure> {
+    public func receive(@_implicitSelfCapture on callback: @escaping (@Sendable @escaping () -> ()) -> ()) -> Promise<Output, Failure> where Output: Sendable {
         let promise = Promise<Output, Failure>()
         self.subscribe({ o in callback{ promise.resolve(o) } }, { f in callback{ promise.reject(f) } })
         return promise
@@ -256,7 +256,7 @@ extension Promise {
     
     @inlinable
     public func sink(@_implicitSelfCapture _ receiveOutput: @escaping (Output) -> ()) where Failure == Never {
-        self.subscribe(receiveOutput, {_ in})
+        self.subscribe(receiveOutput, {_ in })
     }
     
     @inlinable

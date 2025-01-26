@@ -7,8 +7,6 @@
 
 @available(*, deprecated, message: "Promise cancel feature has been deprecated. Use own error type instead.")
 public struct PromiseCancel: Error {
-    public var userInfo = [String: Any?]()
-    
     public init() {}
     
     public var errorDescription: String? { "Promise has been cancelled." }

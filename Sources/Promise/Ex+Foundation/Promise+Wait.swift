@@ -18,13 +18,13 @@ extension Duration {
  
 extension Promise {
     @inlinable
-    public func wait(on queue: DispatchQueue = .main, for interval: TimeInterval) -> Promise<Output, Failure> {
+    public func wait(on queue: DispatchQueue = .main, for interval: TimeInterval) -> Promise<Output, Failure> where Output: Sendable {
         self.receive(on: { queue.asyncAfter(deadline: .now() + interval, execute: $0) })
     }
     
     @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
     @inlinable
-    public func wait(on queue: DispatchQueue = .main, for duration: Duration) -> Promise<Output, Failure> {
+    public func wait(on queue: DispatchQueue = .main, for duration: Duration) -> Promise<Output, Failure> where Output: Sendable {
         return self.wait(on: queue, for: duration.timeInterval)
     }
     

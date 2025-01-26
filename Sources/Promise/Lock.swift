@@ -1,6 +1,6 @@
 //
 //  Lock.swift
-//
+//  Promise
 //
 //  Created by yuki on 2023/06/28.
 //
@@ -13,15 +13,13 @@ import Glibc // for Linux
 #error("Unsupported platform")
 #endif
 
-@usableFromInline final class Lock {
-    #if DEBUG
-    @usableFromInline static let attr: UnsafePointer<pthread_mutexattr_t> = {
+@usableFromInline final class Lock: @unchecked Sendable {
+    @usableFromInline nonisolated(unsafe) static let attr: UnsafePointer<pthread_mutexattr_t> = {
         let attr = UnsafeMutablePointer<pthread_mutexattr_t>.allocate(capacity: 1)
         _HANDLE_PTHREAD_CALL(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
         _HANDLE_PTHREAD_CALL(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_ERRORCHECK), "pthread_mutexattr_settype")
         return UnsafePointer(attr)
     }()
-    #endif
 
     @usableFromInline var mutex = pthread_mutex_t()
     
@@ -46,8 +44,8 @@ import Glibc // for Linux
     }
 }
 
-@usableFromInline final class RecursiveLock {
-    @usableFromInline static let attr = {
+@usableFromInline final class RecursiveLock: @unchecked Sendable {
+    @usableFromInline nonisolated(unsafe) static let attr = {
         let attr = UnsafeMutablePointer<pthread_mutexattr_t>.allocate(capacity: 1)
         _HANDLE_PTHREAD_CALL(pthread_mutexattr_init(attr), "pthread_mutexattr_init")
         _HANDLE_PTHREAD_CALL(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_RECURSIVE), "pthread_mutexattr_settype")
@@ -81,6 +79,7 @@ import Glibc // for Linux
 @inlinable @_transparent
 func _HANDLE_PTHREAD_CALL(_ res: Int32, _ funcname: @autoclosure () -> StaticString) {
     if res != 0 {
-        fatalError("\(funcname()) failed: \(String(validatingUTF8: strerror(res)) ?? "Unkown Error")")
+        fatalError("\(funcname()) failed: \(String(validatingCString: strerror(res)) ?? "Unkown Error")")
     }
 }
+

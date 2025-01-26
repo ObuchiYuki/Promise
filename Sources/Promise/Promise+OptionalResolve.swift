@@ -106,7 +106,7 @@ extension Promise {
     @inlinable
     public func catchUnresolveError(_ replacingError: Failure) -> Promise<Output, Failure> {
         self.mapError {
-            guard let error = $0 as? PromiseUnresolveError else { return $0 }
+            guard $0 is PromiseUnresolveError else { return $0 }
             return replacingError
         }
     }
