@@ -83,7 +83,7 @@ extension Promise where Output: Sendable {
     @inlinable
     public static func detached(
         priority: TaskPriority? = nil,
-        @_inheritActorContext @_implicitSelfCapture _ task: __owned @Sendable @escaping () async throws -> Output
+        @_inheritActorContext @_implicitSelfCapture _ task: @Sendable @escaping () async throws -> Output
     ) -> Promise<Output, Failure> where Failure == Error {
         let promise = Promise<Output, Failure>()
         let task = Task.detached(priority: priority) { do { promise.resolve(try await task()) } catch { promise.reject(error) } }
@@ -93,8 +93,8 @@ extension Promise where Output: Sendable {
     
     @inlinable
     public func asink(
-        @_inheritActorContext @_implicitSelfCapture _ receiveOutput: __owned @Sendable @escaping (Output) async -> Void,
-        @_inheritActorContext @_implicitSelfCapture _ receiveFailure: __owned @Sendable @escaping (Failure) async -> Void
+        @_inheritActorContext @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void,
+        @_inheritActorContext @_implicitSelfCapture _ receiveFailure: @Sendable @escaping (Failure) async -> Void
     ) {
         self.subscribe({ output in
             Task { await receiveOutput(output) }
@@ -120,6 +120,13 @@ extension Promise where Output: Sendable {
             Task { await receiveFailure(error) }
         })
     }
+}
+
+func m() {
+    Promise<Int, Never>.resolve(1)
+        .apeek { @MainActor value in
+            print(value.advanced(by: 1))
+        }
 }
 
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
