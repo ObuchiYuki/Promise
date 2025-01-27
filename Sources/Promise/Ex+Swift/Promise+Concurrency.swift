@@ -39,7 +39,7 @@ extension Promise where Output: Sendable, Failure == Never {
     }
     
     @inlinable
-    public func sink(
+    public func asink(
         @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void
     ) {
         self.subscribe({ output in
@@ -86,7 +86,7 @@ extension Promise where Output: Sendable {
     }
     
     @inlinable
-    public func sink(
+    public func asink(
         @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void,
         @_implicitSelfCapture _ receiveFailure: @Sendable @escaping (Failure) async -> Void
     ) {
@@ -96,6 +96,31 @@ extension Promise where Output: Sendable {
             Task { await receiveFailure(error) }
         })
     }
+    
+    @inlinable
+    public func apeek(
+        @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void
+    ) {
+        self.subscribe({ output in
+            Task { await receiveOutput(output) }
+        }, { _ in })
+    }
+    
+    @inlinable
+    public func apeekError(
+        @_implicitSelfCapture _ receiveFailure: @Sendable @escaping (Failure) async -> Void
+    ) {
+        self.subscribe({ _ in }, { error in
+            Task { await receiveFailure(error) }
+        })
+    }
+}
+
+func m() {
+    Promise<Int, Never>.resolve(1)
+        .asink{ @MainActor value in
+            print(value)
+        }
 }
 
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
