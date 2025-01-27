@@ -24,14 +24,20 @@ extension Promise where Output: Sendable, Failure == Never {
     }
 
     @inlinable
-    public convenience init(priority: TaskPriority? = nil, @_implicitSelfCapture _ task: @Sendable @escaping () async -> Output) {
+    public convenience init(
+        priority: TaskPriority? = nil,
+        @_inheritActorContext @_implicitSelfCapture _ task: @Sendable @escaping () async -> Output
+    ) {
         self.init()
         let task = Task(priority: priority) { self.resolve(await task()) }
         self.subscribe({_ in task.cancel() }, {_ in })
     }
     
     @inlinable
-    public static func detached(priority: TaskPriority? = nil, @_implicitSelfCapture _ task: @Sendable @escaping () async -> Output) -> Promise<Output, Failure> {
+    public static func detached(
+        priority: TaskPriority? = nil,
+        @_inheritActorContext @_implicitSelfCapture _ task: @Sendable @escaping () async -> Output
+    ) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
         let task = Task.detached(priority: priority) { promise.resolve(await task()) }
         promise.subscribe({_ in task.cancel() }, {_ in })
@@ -40,7 +46,7 @@ extension Promise where Output: Sendable, Failure == Never {
     
     @inlinable
     public func asink(
-        @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void
+        @_inheritActorContext @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void
     ) {
         self.subscribe({ output in
             Task { await receiveOutput(output) }
@@ -67,7 +73,7 @@ extension Promise where Output: Sendable {
     @inlinable
     public convenience init(
         priority: TaskPriority? = nil,
-        @_implicitSelfCapture _ task: @Sendable @escaping () async throws -> Output
+        @_inheritActorContext @_implicitSelfCapture _ task: @Sendable @escaping () async throws -> Output
     ) where Failure == Error {
         self.init()
         let task = Task(priority: priority) { do { self.resolve(try await task()) } catch { self.reject(error) } }
@@ -77,7 +83,7 @@ extension Promise where Output: Sendable {
     @inlinable
     public static func detached(
         priority: TaskPriority? = nil,
-        @_implicitSelfCapture _ task: @Sendable @escaping () async throws -> Output
+        @_inheritActorContext @_implicitSelfCapture _ task: __owned @Sendable @escaping () async throws -> Output
     ) -> Promise<Output, Failure> where Failure == Error {
         let promise = Promise<Output, Failure>()
         let task = Task.detached(priority: priority) { do { promise.resolve(try await task()) } catch { promise.reject(error) } }
@@ -87,8 +93,8 @@ extension Promise where Output: Sendable {
     
     @inlinable
     public func asink(
-        @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void,
-        @_implicitSelfCapture _ receiveFailure: @Sendable @escaping (Failure) async -> Void
+        @_inheritActorContext @_implicitSelfCapture _ receiveOutput: __owned @Sendable @escaping (Output) async -> Void,
+        @_inheritActorContext @_implicitSelfCapture _ receiveFailure: __owned @Sendable @escaping (Failure) async -> Void
     ) {
         self.subscribe({ output in
             Task { await receiveOutput(output) }
@@ -99,7 +105,7 @@ extension Promise where Output: Sendable {
     
     @inlinable
     public func apeek(
-        @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void
+        @_inheritActorContext @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void
     ) {
         self.subscribe({ output in
             Task { await receiveOutput(output) }
@@ -108,19 +114,12 @@ extension Promise where Output: Sendable {
     
     @inlinable
     public func apeekError(
-        @_implicitSelfCapture _ receiveFailure: @Sendable @escaping (Failure) async -> Void
+        @_inheritActorContext @_implicitSelfCapture _ receiveFailure: @Sendable @escaping (Failure) async -> Void
     ) {
         self.subscribe({ _ in }, { error in
             Task { await receiveFailure(error) }
         })
     }
-}
-
-func m() {
-    Promise<Int, Never>.resolve(1)
-        .asink{ @MainActor value in
-            print(value)
-        }
 }
 
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
