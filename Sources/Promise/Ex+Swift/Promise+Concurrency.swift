@@ -122,13 +122,6 @@ extension Promise where Output: Sendable {
     }
 }
 
-func m() {
-    Promise<Int, Never>.resolve(1)
-        .apeek { @MainActor value in
-            print(value.advanced(by: 1))
-        }
-}
-
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension Task {
     @inlinable
