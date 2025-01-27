@@ -13,7 +13,7 @@ struct PromiseTestError: Error {}
 final class PromiseOperatorTests: XCTestCase {
     
     func testPromise_CallbackInit() throws {
-        Promise{ resolve, _ in
+        Promise<String, Never>{ resolve, _ in
             DispatchQueue.main.async { resolve("Hello World") }
         }
         .peek{ XCTAssertEqual($0, "Hello World") }
