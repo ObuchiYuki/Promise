@@ -46,7 +46,7 @@ extension Promise where Output: Sendable, Failure == Never {
     
     @inlinable
     public func asink(
-        @_inheritActorContext @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void
+        _ receiveOutput: @Sendable @escaping (Output) async -> Void
     ) {
         self.subscribe({ output in
             Task { await receiveOutput(output) }
@@ -72,6 +72,14 @@ extension Promise where Output: Sendable {
     
     @inlinable
     public convenience init(
+        @_implicitSelfCapture _ handler: (@Sendable @escaping (Output) -> (), @Sendable @escaping (Failure) -> ()) -> ()
+    ) {
+        self.init()
+        handler(self.resolve, self.reject)
+    }
+    
+    @inlinable
+    public convenience init(
         priority: TaskPriority? = nil,
         @_inheritActorContext @_implicitSelfCapture _ task: @Sendable @escaping () async throws -> Output
     ) where Failure == Error {
@@ -93,8 +101,8 @@ extension Promise where Output: Sendable {
     
     @inlinable
     public func asink(
-        @_inheritActorContext @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void,
-        @_inheritActorContext @_implicitSelfCapture _ receiveFailure: @Sendable @escaping (Failure) async -> Void
+        @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void,
+        @_implicitSelfCapture _ receiveFailure: @Sendable @escaping (Failure) async -> Void
     ) {
         self.subscribe({ output in
             Task { await receiveOutput(output) }
@@ -105,7 +113,7 @@ extension Promise where Output: Sendable {
     
     @inlinable
     public func apeek(
-        @_inheritActorContext @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void
+        @_implicitSelfCapture _ receiveOutput: @Sendable @escaping (Output) async -> Void
     ) {
         self.subscribe({ output in
             Task { await receiveOutput(output) }
@@ -114,11 +122,18 @@ extension Promise where Output: Sendable {
     
     @inlinable
     public func apeekError(
-        @_inheritActorContext @_implicitSelfCapture _ receiveFailure: @Sendable @escaping (Failure) async -> Void
+        @_implicitSelfCapture _ receiveFailure: @Sendable @escaping (Failure) async -> Void
     ) {
         self.subscribe({ _ in }, { error in
             Task { await receiveFailure(error) }
         })
+    }
+    
+    @inlinable
+    public func receive(@_implicitSelfCapture on callback: @escaping (@Sendable @escaping () -> ()) -> ()) -> Promise<Output, Failure> {
+        let promise = Promise<Output, Failure>()
+        self.subscribe({ o in callback{ promise.resolve(o) } }, { f in callback{ promise.reject(f) } })
+        return promise
     }
 }
 

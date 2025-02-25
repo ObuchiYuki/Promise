@@ -13,12 +13,6 @@ extension Promise {
     }
     
     @inlinable
-    public convenience init(@_implicitSelfCapture _ handler: (@Sendable @escaping (Output) -> (), @Sendable @escaping (Failure) -> ()) -> ()) where Output: Sendable {
-        self.init()
-        handler(self.resolve, self.reject)
-    }
-    
-    @inlinable
     public convenience init(@_implicitSelfCapture _ handler: (@escaping (Output) -> (), @escaping (Failure) -> ()) throws -> ()) where Failure == Error {
         self.init()
         do { try handler(self.resolve, self.reject) } catch { self.reject(error) }
