@@ -24,9 +24,7 @@ extension Promise where Output: Sendable {
         self.subscribe(promise.resolve, promise.reject)
             
         queue.asyncAfter(deadline: .now() + interval) {
-            if !promise.isSettled {
-                promise.reject(error())
-            }
+            promise.reject(error())
         }
         
         return promise

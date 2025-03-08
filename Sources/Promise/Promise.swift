@@ -14,7 +14,11 @@ public final class Promise<Output, Failure: Error> {
     
     @usableFromInline typealias Subscriber = (resolve: (Output) -> (), reject: (Failure) -> ())
     
-    @inlinable public var state: State { self._state }
+    @inlinable public var state: State {
+        self._lock.lock()
+        defer { self._lock.unlock() }
+        return self._state
+    }
 
     @usableFromInline var _state = State.pending
     @usableFromInline var _subscribers = [Subscriber]()
