@@ -5,7 +5,6 @@
 //  Created by yuki on 2021/08/23.
 //
 
-
 @usableFromInline struct PrintTarget: TextOutputStream {
     @usableFromInline func write(_ string: String) { Swift.print(string) }
     

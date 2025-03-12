@@ -16,7 +16,7 @@ final class PromisePublisherTests: XCTestCase {
     func testPublisherPromise_Just() {
         var fulfilled = false
         Just(123).firstValue()
-            .sink{
+            .sink {
                 fulfilled = true
                 XCTAssertEqual($0, 123)
             }
@@ -26,7 +26,7 @@ final class PromisePublisherTests: XCTestCase {
     func testPublisherPromise_Empty() {
         var fulfilled = false
         Empty<Int, Never>().firstValue()
-            .sink{
+            .sink {
                 fulfilled = true
                 XCTAssertEqual($0, nil)
             }
@@ -37,11 +37,11 @@ final class PromisePublisherTests: XCTestCase {
         var fulfilled = false
         Just(1).combineLatest(Just(2), Just(3))
             .firstValue()
-            .tryPeek{
+            .tryPeek {
                 fulfilled = true
                 XCTAssert(try XCTUnwrap($0) == (1, 2, 3))
             }
-            .catch{_ in XCTFail() }
+            .catch { _ in XCTFail() }
         XCTAssert(fulfilled)
     }
     
@@ -50,7 +50,7 @@ final class PromisePublisherTests: XCTestCase {
         
         var value: Int? = nil
         promise.publisher()
-            .sink{ value = $0 }
+            .sink { value = $0 }
             .store(in: &objectBag)
         
         XCTAssertEqual(value, nil)

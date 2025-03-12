@@ -22,7 +22,7 @@ extension PromiseUnresolveError: LocalizedError {
 extension Promise where Failure == Error {
     @inlinable
     public static func optionallyResolving() -> (promise: Promise<Output, Failure>, resolver: PromiseResolver<Output>, rejector: PromiseRejector<Output>) {
-        let promise = Promise<Output, Failure>()
+        let promise = Promise<Output, Error>()
         
         let observer = PromiseObserver(promise: promise)
         let resolver = PromiseResolver(promise: promise, observer: observer)
@@ -33,7 +33,7 @@ extension Promise where Failure == Error {
     
     @inlinable
     public static func optionallyResolving(@_implicitSelfCapture _ handler: (PromiseResolver<Output>, PromiseRejector<Output>) -> ()) -> Promise<Output, Failure> {
-        let promise = Promise<Output, Failure>()
+        let promise = Promise<Output, Error>()
         
         let observer = PromiseObserver(promise: promise)
         let resolver = PromiseResolver(promise: promise, observer: observer)
@@ -44,8 +44,9 @@ extension Promise where Failure == Error {
         return promise
     }
     
-    @inlinable public static func optionallyResolving(@_implicitSelfCapture _ handler: (PromiseResolver<Output>, PromiseRejector<Output>) throws -> ()) -> Promise<Output, Failure> {
-        let promise = Promise<Output, Failure>()
+    @inlinable
+    public static func optionallyResolving(@_implicitSelfCapture _ handler: (PromiseResolver<Output>, PromiseRejector<Output>) throws -> ()) -> Promise<Output, Failure> {
+        let promise = Promise<Output, Error>()
         
         let observer = PromiseObserver(promise: promise)
         let resolver = PromiseResolver(promise: promise, observer: observer)
@@ -76,6 +77,7 @@ final class PromiseObserver<Output> {
 
 public final class PromiseResolver<Output> {
     @usableFromInline let promise: Promise<Output, Error>
+    
     @usableFromInline let observer: PromiseObserver<Output>
     
     @inlinable init(promise: Promise<Output, Error>, observer: PromiseObserver<Output>) {
@@ -90,6 +92,7 @@ public final class PromiseResolver<Output> {
 
 public final class PromiseRejector<Output> {
     @usableFromInline let promise: Promise<Output, Error>
+    
     @usableFromInline let observer: PromiseObserver<Output>
     
     @inlinable init(promise: Promise<Output, Error>, observer: PromiseObserver<Output>) {
@@ -102,15 +105,10 @@ public final class PromiseRejector<Output> {
     }
 }
 
-extension Promise {
-    @inlinable
-    public func catchUnresolveError(_ replacingError: Failure) -> Promise<Output, Failure> {
-        self.mapError {
-            guard $0 is PromiseUnresolveError else { return $0 }
-            return replacingError
-        }
-    }
-}
+// Swift Concurrency Support
 
+extension PromiseObserver: Sendable where Output: Sendable {}
 
+extension PromiseResolver: Sendable where Output: Sendable {}
 
+extension PromiseRejector: Sendable where Output: Sendable {}

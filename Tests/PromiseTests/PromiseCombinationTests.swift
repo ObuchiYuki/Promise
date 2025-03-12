@@ -7,7 +7,7 @@ final class PromiseCombinationTests: XCTestCase {
             Promise.resolve(1),
             Promise.resolve(2)
         )
-        .peek{
+        .peek {
             XCTAssertEqual($0.0, 1)
             XCTAssertEqual($0.1, 2)
         }
@@ -27,7 +27,7 @@ final class PromiseCombinationTests: XCTestCase {
         
         Promise<(Int, Int), Never>
             .combine(promiseA, promiseB, promiseC, promiseD)
-            .peek{
+            .peek {
                 XCTAssertEqual($0.0, 1)
                 XCTAssertEqual($0.1, 2)
                 XCTAssertEqual($0.2, 3)

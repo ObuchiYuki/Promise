@@ -21,7 +21,7 @@ extension Promise {
     }
     
     @inlinable
-    public func flatMap<T>(@_implicitSelfCapture _ tranceform: @escaping (Output, @escaping (T) -> (), @escaping (Failure)->()) -> ()) -> Promise<T, Failure> {
+    public func flatMap<T>(@_implicitSelfCapture _ tranceform: @escaping (Output, @escaping (T) -> (), @escaping (Failure) -> ()) -> ()) -> Promise<T, Failure> {
         let promise = Promise<T, Failure>()
         self.subscribe({ tranceform($0, promise.resolve, promise.reject) }, promise.reject)
         return promise
@@ -44,7 +44,7 @@ extension Promise {
     }
     
     @inlinable
-    public func tryFlatMap<T>(@_implicitSelfCapture _ tranceform: @escaping (Output, @escaping (T) -> (), @escaping (Failure)->()) throws -> ()) -> Promise<T, Error> {
+    public func tryFlatMap<T>(@_implicitSelfCapture _ tranceform: @escaping (Output, @escaping (T) -> (), @escaping (Failure) -> ()) throws -> ()) -> Promise<T, Error> {
         let promise = Promise<T, Error>()
         self.subscribe({
             do { try tranceform($0, promise.resolve, promise.reject) } catch { promise.reject(error) }
@@ -182,7 +182,7 @@ extension Promise {
     @inlinable
     public func `catch`(@_implicitSelfCapture _ receiveFailure: @escaping (Failure) -> ()) -> Promise<Void, Never> {
         let promise = Promise<Void, Never>()
-        self.subscribe({_ in promise.resolve(()) }, { receiveFailure($0); promise.resolve(()) })
+        self.subscribe({ _ in promise.resolve(()) }, { receiveFailure($0); promise.resolve(()) })
         return promise
     }
 

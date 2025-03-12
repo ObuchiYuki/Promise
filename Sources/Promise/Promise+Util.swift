@@ -8,10 +8,11 @@
 extension Promise {
     @inlinable
     public var result: Result<Output, Failure>? {
-        if case .fulfilled(let output) = self._state {
+        let state = self.state
+        if case .fulfilled(let output) = state {
             return .success(output)
         }
-        if case .rejected(let failure) = self._state {
+        if case .rejected(let failure) = state {
             return .failure(failure)
         }
         return nil
@@ -19,7 +20,7 @@ extension Promise {
     
     @inlinable
     public var isSettled: Bool {
-        if case .pending = self._state { return false }
+        if case .pending = self.state { return false }
         return true
     }
 }

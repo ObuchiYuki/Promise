@@ -15,7 +15,7 @@ final class PromiseDeinitTests: XCTestCase {
             let promise = Promise<Void, Error>
                 .optionallyResolving { resolve, reject in }
             
-            promise.catch {_ in failed = true }
+            promise.catch { _ in failed = true }
         }
         
         XCTAssertTrue(failed)
@@ -29,7 +29,7 @@ final class PromiseDeinitTests: XCTestCase {
                     resolve(())
                 }
             
-            promise.catch {_ in failed = true }
+            promise.catch { _ in failed = true }
         }
         
         XCTAssertFalse(failed)
@@ -45,7 +45,7 @@ final class PromiseDeinitTests: XCTestCase {
                     resolver = resolve
                 }
             
-            promise.catch {_ in failed = true }
+            promise.catch { _ in failed = true }
         }
         
         XCTAssertNotNil(resolver)
@@ -64,7 +64,7 @@ final class PromiseDeinitTests: XCTestCase {
                     rejector = reject
                 }
             
-            promise.catch {_ in failed = true }
+            promise.catch { _ in failed = true }
         }
         
         XCTAssertNotNil(resolver)

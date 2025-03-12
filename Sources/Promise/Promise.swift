@@ -21,7 +21,9 @@ public final class Promise<Output, Failure: Error> {
     }
 
     @usableFromInline var _state = State.pending
+    
     @usableFromInline var _subscribers = [Subscriber]()
+    
     @usableFromInline var _lock = RecursiveLock()
     
     @inlinable public init() {}
@@ -44,7 +46,11 @@ extension Promise {
         guard case .pending = self._state else { return }
         
         self._state = .fulfilled(output)
-        for subscriber in self._subscribers { subscriber.resolve(output) }
+        
+        for subscriber in self._subscribers {
+            subscriber.resolve(output)
+        }
+        
         self._subscribers.removeAll()
     }
     
@@ -56,7 +62,11 @@ extension Promise {
         guard case .pending = self._state else { return }
         
         self._state = .rejected(failure)
-        for subscriber in self._subscribers { subscriber.reject(failure) }
+        
+        for subscriber in self._subscribers {
+            subscriber.reject(failure)
+        }
+        
         self._subscribers.removeAll()
     }
 

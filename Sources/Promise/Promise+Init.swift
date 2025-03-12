@@ -21,7 +21,7 @@ extension Promise {
     @inlinable
     public convenience init(_ promise: Promise<Output, Failure>) {
         self.init()
-        promise.subscribe(self.resolve(_:), self.reject(_:))
+        promise.subscribe(self.resolve, self.reject)
     }
     
     @inlinable

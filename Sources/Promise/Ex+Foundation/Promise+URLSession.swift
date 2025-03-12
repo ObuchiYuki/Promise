@@ -10,11 +10,11 @@ import Foundation
 
 extension URLSession {
     @inlinable public func data(for url: URL) -> Promise<Data, Error> {
-        self.fetch(url).map{ $0.1 }
+        self.fetch(url).map { $0.1 }
     }
     
     @inlinable public func data(for request: URLRequest) -> Promise<Data, Error> {
-        self.fetch(request).map{ $0.1 }
+        self.fetch(request).map { $0.1 }
     }
     
     @inlinable public func fetch(_ url: URL) -> Promise<(URLResponse, Data), Error> {
