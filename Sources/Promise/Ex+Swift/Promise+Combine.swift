@@ -10,6 +10,12 @@ import Combine
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension Promise {
+    
+    /// Exposes the promise as a Combine `Publisher`.
+    ///
+    /// The returned publisher behaves like `Future`—publishing once then
+    /// completing.  Multiple subscriptions do **not** multiply work; they
+    /// simply observe the already‑running promise.
     @inlinable
     public func publisher() -> some Publisher<Output, Failure> {
         Future { handler in
@@ -20,6 +26,11 @@ extension Promise {
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension Publisher {
+    
+    /// Collects the **first** value from the publisher into a promise.
+    ///
+    /// If the publisher completes without emitting, the promise resolves with
+    /// `nil`.  If it fails, the error is forwarded unchanged.
     @inlinable
     public func firstValue() -> Promise<Output?, Failure> {
         let promise = Promise<Output?, Failure>()

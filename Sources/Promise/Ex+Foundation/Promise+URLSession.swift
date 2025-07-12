@@ -9,19 +9,32 @@
 import Foundation
 
 extension URLSession {
-    @inlinable public func data(for url: URL) -> Promise<Data, Error> {
+    
+    /// Convenience wrapper for `data(for:)` that returns only the raw data.
+    @inlinable
+    public func data(for url: URL) -> Promise<Data, Error> {
         self.fetch(url).map { $0.1 }
     }
     
-    @inlinable public func data(for request: URLRequest) -> Promise<Data, Error> {
+    /// Same as ``data(for:)`` but for `URLRequest`.
+    @inlinable
+    public func data(for request: URLRequest) -> Promise<Data, Error> {
         self.fetch(request).map { $0.1 }
     }
     
-    @inlinable public func fetch(_ url: URL) -> Promise<(URLResponse, Data), Error> {
+    /// Performs a GET against `url`, yielding the `URLResponse` and `Data`.
+    @inlinable
+    public func fetch(_ url: URL) -> Promise<(URLResponse, Data), Error> {
         self.fetch(URLRequest(url: url))
     }
     
-    @inlinable public func fetch(_ request: URLRequest) -> Promise<(URLResponse, Data), Error> {
+    /// General‑purpose wrapper around `URLSession.dataTask(with:)`.
+    ///
+    /// The promise is resolved with `(response, data)` or rejected with:
+    /// * the underlying `URLSession` error;
+    /// * a synthesized `NSError` when no data/error is produced.
+    @inlinable
+    public func fetch(_ request: URLRequest) -> Promise<(URLResponse, Data), Error> {
         let promise = Promise<(URLResponse, Data), Error>()
         
         self.dataTask(with: request) { data, responce, error in
@@ -42,13 +55,17 @@ extension URLSession {
 }
 
 extension Data {
-    @inlinable public static func async(contentsOf url: URL) -> Promise<Data, Error> {
+    /// Asynchronously loads the contents of `url` into memory.
+    @inlinable
+    public static func async(contentsOf url: URL) -> Promise<Data, Error> {
         URLSession.shared.data(for: url)
     }
 }
 
 extension String {
-    @inlinable public static func async(contentsOf url: URL, encoding: Encoding) -> Promise<String, Error> {
+    /// Asynchronously loads a remote string with the specified encoding.
+    @inlinable
+    public static func async(contentsOf url: URL, encoding: Encoding) -> Promise<String, Error> {
         Promise.tryDispatch { try String(contentsOf: url, encoding: encoding) }
     }
 }

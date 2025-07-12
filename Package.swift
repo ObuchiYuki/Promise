@@ -14,6 +14,9 @@ let package = Package(
     products: [
         .library(name: "Promise", targets: ["Promise"])
     ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-docc-plugin", .upToNextMajor(from: "1.4.5"))
+    ],
     targets: [
         .target(name: "Promise"),
         .testTarget(name: "PromiseTests", dependencies: ["Promise"])

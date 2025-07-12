@@ -1,190 +1,126 @@
 # Promise
 
-軽量かつシンプルなSwiftのPromise実装です。
+A lightweight, thread‑safe Promise/Future implementation written in Swift.
 
-## 使い方
+Promise focuses on three goals:
 
-ベーシックな使い方
+- Minimal overhead: a single lock guards state; no dispatch queues or allocs after settlement
+- Expressive API: an operator set that mirrors Combine and Swift Concurrency
+- Easy interop: bridges for Combine, Swift async/await, Grand Central Dispatch, and URLSession
+
+
+
+---
+
+
+
+## Features
+
+- Familiar chaining (`map`, `flatMap`, `catch`, `finally`, `timeout`, `wait`, and more)
+- Value and error transformation operators
+- Racing and zipping helpers such as `merge`, `combine`, `combineAll`
+- Swift Concurrency bridges (`promise.value`, detached tasks, `Task.promise`)
+- Combine bridges (`promise.publisher()` and `Publisher.firstValue()`)
+- GCD helpers for running work on queues or delaying delivery
+- URLSession convenience wrappers (`session.fetch`, `session.data`)
+- Built‑in debug aids (`print`, `measureInterval`, `breakpointOnError`)
+- Optional resolver/rejector objects that raise on deinit if unused
+- Fully Sendable on supported platforms
+- Requires no external dependencies
+
+
+
+---
+
+
+
+## Requirements
+
+| Platform | Minimum Version |
+| -------- | --------------- |
+| iOS      | 12.0            |
+| macOS    | 10.15           |
+| tvOS     | 12.0            |
+| watchOS  | 4.0             |
+
+Swift 6 or later and Xcode 17 are recommended.
+
+
+
+---
+
+
+
+## Installation
+
+### Swift Package Manager
+
+Add the package URL in Xcode:
+```
+
+https://github.com/ObuchiYuki/Promise.git
+
+```
+or add it to `dependencies` in `Package.swift`:
 
 ```swift
-let promise = Promise<Int, Never> { resolve, reject in
-    resolve(10)
+.package(url: "https://github.com/ObuchiYuki/Promise.git", from: "1.0.0")
+```
+
+Then declare a target dependency:
+
+```swift
+.target(
+    name: "YourApp",
+    dependencies: ["Promise"]
+)
+```
+
+
+
+------
+
+
+
+## Quick start
+
+```swift
+// Wrap URLSession into a promise
+func loadImage(from url: URL) -> Promise<UIImage, Error> {
+    URLSession.shared.data(for: url)
+        .map(UIImage.init(data:))
+        .tryMap { image -> UIImage in
+            guard let image else { throw URLError(.cannotDecodeContentData) }
+            return image
+        }
 }
 
-promise
-    .map{ $0 * 10 } 
-    .sink{ print($0) } // 100
-    
-let imageData = URLSession.shared.data(for: URL(string: "https://example.com/image.png))
+// Consume with Combine‑style operators
+loadImage(from: url)
+    .timeout(5)
+    .peek { print("loaded image with size \($0.size)") }
+    .catch { print("failed:", $0) }
 
-imageData
-    .sink{ print($0) } 
+// Or with async/await
+let image = try await loadImage(from: url).value
 ```
 
 
 
-Async・Awaitをサポートしています。
+------
 
-```swift
-let dataPromsie = Promise<Int, Never> { resolve, reject in
-	// download data
-}
 
-asyncHandler { await in
-    let data = await | dataPromsie
-	let image = await | UIImage.async(data: data)
-              
-	print(image.size)
-}
-```
 
+## Documentation
 
 
-## Operators
 
-- `map`
+------
 
-  Outputをクロージャで変換します。
 
-- `flatMap`
 
-  クロージャの返り値のPromiseと連結します。
+## License
 
-- `tryMap`
-
-  throwsなクロージャを実行して失敗した場合は以降のPromiseを失敗にします。
-
-- `tryFlatMap`
-
-  throwsなクロージャを実行して失敗した場合は以降のPromiseを失敗にします。
-
-- `mapError`
-
-  Failureをクロージャで変換します。
-
-- `replaceError`
-
-  Failureを引数のOutputで置き換えます。
-
-- `eraseToError`
-
-  Failureの型をErrorに変換します。
-
-- `eraseToVoid`
-
-  Outputの方をVoidに変換します。
-
-- `peek`
-
-  Outputの場合にクロージャを実行します。以降にOperatorを接続することができます。
-
-- `peekError`
-
-  Failureの場合にクロージャを実行します。以降にOperatorを接続することができます。
-
-- `sink`
-
-  Outputの場合にクロージャを実行します。以降にOperatorを接続することができません。
-
-- `catch`
-
-  Failureの場合にクロージャを実行します。以降にOperatorを接続することができません。
-
-
-
-##### Operator接続の例
-
-```swift
-let dataPromise: Promise<Data, Error> = ...
-
-dataPromise
-	.map{ 
-        // 値の変換
-    }
-	.peek{
-        // アクションの実行
-    }
-	.catch{ 
-        // エラーのハンドリング
-    }
-```
-
-
-
-## Async・Awaitの使用
-
-`asyncHandler`を用いることでAsync・Awaitを使用することができます。
-
-
-
-```swift
-let dataPromise: Promise<Data, Error> = ...
-let intPromise: Promise<Int, Never> = ...
-
-let promise = asyncHandler { await in
-	// promiseのawait
-	let data = try await | dataPromise
-	// FailureがNeverの場合はtryはいらない
-	let int = await | intPromise
-	
-              
-	return "Hello World" 
-}
-
-// 返り値をOutput、投げられた例外をFailureとするPromiseになる
-```
-
-
-
-## QueueとPromise
-
-Promiseは通常は実行したQueueで実行されます。
-
-別のQueueで実行したい場合は`async`を使います。
-
-
-
-```swift
-Promise.async{ resolve, reject in
-	// 重い処理
-	...
-	resolve(result)
-}
-.receive(on: .main) // メインスレッドで受け取る
-.sink{ ... } // 実行処理
-```
-
-
-
-## 特殊なOperator
-
-##### `Combine`
-
-2つ以上のPromiseを組み合わせて全て成功した場合にタプルでOutputを返します。
-
-```swift
-let promise1 = Promise(...)
-let promise2 = Promise(...)
-
-promise1.combine(promise2)
-	.sink{ ... }  // 実行処理
-```
-
-
-
-##### `CombineCollection`
-
-Promiseの配列を組み合わせて全て成功した場合に配列でOutputを返します。
-
-```swift
-let promises = [Promise](...)
-
-
-promises.combine()
-	.sink{ ... }  // 実行処理
-```
-
-
-
-
+Promise is released under the MIT License.
+See the `LICENSE` file for details.
 
