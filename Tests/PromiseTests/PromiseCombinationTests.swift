@@ -4,8 +4,8 @@ import Promise
 final class PromiseCombinationTests: XCTestCase {
     func testCombine_resultToBeTuple() {
         Promise<(Int, Int), Never>.combine(
-            Promise.resolve(1),
-            Promise.resolve(2)
+            Promise<Int, Never>.resolve(1),
+            Promise<Int, Never>.resolve(2)
         )
         .peek {
             XCTAssertEqual($0.0, 1)

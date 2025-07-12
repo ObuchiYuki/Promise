@@ -57,6 +57,15 @@ final class PromisePublisherTests: XCTestCase {
         promise.resolve(100)
         XCTAssertEqual(value, 100)
     }
+    
+    func testM() {
+        let a: Any.Type
+        func isHashable<T>(_ type: T.Type) -> Bool {
+            type is (any Hashable).Type
+        }
+        
+        print(isHashable(Int.self)) // true
+    }
 }
 
 #endif

@@ -45,7 +45,7 @@ extension Promise where Failure == Error {
     }
     
     @inlinable
-    public static func optionallyResolving(@_implicitSelfCapture _ handler: (PromiseResolver<Output>, PromiseRejector<Output>) throws -> ()) -> Promise<Output, Failure> {
+    public static func optionallyResolving(@_implicitSelfCapture _ handler: (PromiseResolver<Output>, PromiseRejector<Output>) throws -> ()) -> Promise<Output, Failure> where Failure == Error {
         let promise = Promise<Output, Error>()
         
         let observer = PromiseObserver(promise: promise)

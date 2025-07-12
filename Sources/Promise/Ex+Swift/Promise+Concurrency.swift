@@ -30,7 +30,7 @@ extension Promise where Output: Sendable, Failure == Never {
     ) {
         self.init()
         let task = Task(priority: priority) { self.resolve(await task()) }
-        self.subscribe({_ in task.cancel() }, {_ in })
+        self.subscribe({ _ in task.cancel() }, { _ in })
     }
     
     @inlinable
@@ -40,7 +40,7 @@ extension Promise where Output: Sendable, Failure == Never {
     ) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
         let task = Task.detached(priority: priority) { promise.resolve(await task()) }
-        promise.subscribe({_ in task.cancel() }, {_ in })
+        promise.subscribe({ _ in task.cancel() }, { _ in })
         return promise
     }
     
@@ -64,7 +64,7 @@ extension Promise where Output: Sendable {
             }
             #else
             try await withUnsafeThrowingContinuation { continuation in
-                self.sink(continuation.resume(returning:), continuation.resume(throwing:))
+                self.subscribe({ continuation.resume(returning: $0) }, continuation.resume(throwing:))
             }
             #endif
         }
@@ -85,7 +85,7 @@ extension Promise where Output: Sendable {
     ) where Failure == Error {
         self.init()
         let task = Task(priority: priority) { do { self.resolve(try await task()) } catch { self.reject(error) } }
-        self.subscribe({_ in task.cancel() }, {_ in task.cancel() })
+        self.subscribe({ _ in task.cancel() }, { _ in task.cancel() })
     }
     
     @inlinable
@@ -95,7 +95,7 @@ extension Promise where Output: Sendable {
     ) -> Promise<Output, Failure> where Failure == Error {
         let promise = Promise<Output, Failure>()
         let task = Task.detached(priority: priority) { do { promise.resolve(try await task()) } catch { promise.reject(error) } }
-        promise.subscribe({_ in task.cancel() }, {_ in task.cancel() })
+        promise.subscribe({ _ in task.cancel() }, { _ in task.cancel() })
         return promise
     }
     
@@ -132,7 +132,24 @@ extension Promise where Output: Sendable {
     @inlinable
     public func receive(@_implicitSelfCapture on callback: @escaping (@Sendable @escaping () -> ()) -> ()) -> Promise<Output, Failure> {
         let promise = Promise<Output, Failure>()
-        self.subscribe({ o in callback{ promise.resolve(o) } }, { f in callback{ promise.reject(f) } })
+        self.subscribe({ output in
+            callback{ promise.resolve(output) }
+        }, { failure in
+            callback{ promise.reject(failure) }
+        })
+        return promise
+    }
+}
+
+extension Promise {
+    @inlinable
+    public func receiveUnsafe(@_implicitSelfCapture on callback: @escaping (@escaping () -> ()) -> ()) -> Promise<Output, Failure> {
+        let promise = Promise<Output, Failure>()
+        self.subscribe({ output in
+            callback { promise.resolve(output) }
+        }, { failure in
+            callback { promise.reject(failure) }
+        })
         return promise
     }
 }
@@ -148,7 +165,7 @@ extension Task {
             case .failure(let error): promise.reject(error)
             }
         }
-        promise.subscribe({_ in task.cancel() }, {_ in task.cancel() })
+        promise.subscribe({ _ in task.cancel() }, { _ in task.cancel() })
         return promise
     }
 }
